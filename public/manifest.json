@@ -1,13 +1,13 @@
 {
-	"name": "yCRV",
-	"short_name": "yCRV",
-	"description": "The best crv yields in defi. *mic drop*",
+	"name": "veYFI",
+	"short_name": "veYFI",
+	"description": "Stake YFI to take part in governance.",
 	"iconPath": "./favicons/favicon.svg",
 	"locale": "en-US",
-	"uri": "https://yearn.fi/ycrv/",
-	"og": "https://yearn.fi/apps/ycrv-og.png",
+	"uri": "https://yearn.fi/veyfi/",
+	"og": "https://yearn.fi/apps/veyfi-og.png",
 	"twitter": "@iearnfinance",
-	"github": "https://github.com/Majorfi/y",
+	"github": "https://github.com/yearn/yearn.fi",
 	"icons": [
 		{
 			"src": "./favicons/android-icon-192x192.png",

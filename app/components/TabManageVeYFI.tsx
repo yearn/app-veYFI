@@ -1,5 +1,5 @@
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
-import {toBigInt, toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
+import {toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
 import {getTimeUntil, toWeeks} from '@yearn-finance/web-lib/utils/time';
 
 import {ClaimVeYFI} from './ViewClaimVeYFI';

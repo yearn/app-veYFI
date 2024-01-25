@@ -2,20 +2,16 @@ import {VEYFI_CLAIM_REWARDS_ZAP_ABI} from 'app/abi/veYFIClaimRewardsZap.abi';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
 import {BaseError} from 'viem';
 import {erc20ABI} from 'wagmi';
+import {assert, assertAddress, toAddress} from '@builtbymom/web3/utils';
+import {defaultTxStatus, handleTx, toWagmiProvider} from '@builtbymom/web3/utils/wagmi';
 import {prepareWriteContract, readContract} from '@wagmi/core';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
-import {assert} from '@yearn-finance/web-lib/utils/assert';
-import {handleTx, toWagmiProvider} from '@yearn-finance/web-lib/utils/wagmi/provider';
-import {assertAddress} from '@yearn-finance/web-lib/utils/wagmi/utils';
-import {defaultTxStatus} from '@yearn-finance/web-lib/utils/web3/transaction';
 
 import {VEYFI_ABI} from './abi/veYFI.abi';
 import {VEYFI_OPTIONS_ABI} from './abi/veYFIOptions.abi';
 import {YFI_REWARD_POOL_ABI} from './abi/YFIRewardPool.abi';
 
-import type {TAddress} from '@yearn-finance/web-lib/types';
-import type {TWriteTransaction} from '@yearn-finance/web-lib/utils/wagmi/provider';
-import type {TTxResponse} from '@yearn-finance/web-lib/utils/web3/transaction';
+import type {TAddress} from '@builtbymom/web3/types';
+import type {TTxResponse, TWriteTransaction} from '@builtbymom/web3/utils/wagmi';
 import type {Connector} from '@wagmi/core';
 
 /* 🔵 - Yearn Finance **********************************************************

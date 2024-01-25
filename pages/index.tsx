@@ -8,8 +8,7 @@ import {useOption} from 'app/contexts/useOption';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
 import {useVeYFIAPR} from 'app/hooks/useVeYFIAPR';
 import {formatDateShort} from 'app/utils';
-import {formatToNormalizedValue, toBigInt} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {formatAmount, formatPercent} from '@yearn-finance/web-lib/utils/format.number';
+import {formatAmount, formatPercent, toBigInt, toNormalizedValue} from '@builtbymom/web3/utils';
 
 import type {ReactElement} from 'react';
 
@@ -18,8 +17,8 @@ function HeadingData(): ReactElement {
 	const {dYFIPrice} = useOption();
 	const APR = useVeYFIAPR({dYFIPrice});
 
-	const totalLockedYFI = formatToNormalizedValue(toBigInt(votingEscrow?.supply), 18);
-	const yourLockedYFI = formatToNormalizedValue(toBigInt(positions?.deposit?.underlyingBalance), 18);
+	const totalLockedYFI = toNormalizedValue(toBigInt(votingEscrow?.supply), 18);
+	const yourLockedYFI = toNormalizedValue(toBigInt(positions?.deposit?.underlyingBalance), 18);
 	return (
 		<SummaryData
 			items={[

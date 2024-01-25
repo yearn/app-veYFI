@@ -1,8 +1,7 @@
 import {LogoYearn} from 'app/icons/LogoYearn';
-import {ImageWithFallback} from '@yearn-finance/web-lib/components/ImageWithFallback';
-import {YCRV_TOKEN_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
 
 import {VEYFI_DYFI_ADDRESS} from './utils';
+import {ImageWithFallback} from './components/common/ImageWithFallback';
 
 export const APPS = {
 	Vaults: {
@@ -25,7 +24,7 @@ export const APPS = {
 				className={'size-8'}
 				width={64}
 				height={64}
-				src={`${process.env.SMOL_ASSETS_URL}/token/1/${YCRV_TOKEN_ADDRESS}/logo-128.png`}
+				src={`${process.env.SMOL_ASSETS_URL}/token/1/0xFCc5c47bE19d06BF83eB04298b026F81069ff65b/logo-128.png`}
 				loading={'eager'}
 				priority
 			/>

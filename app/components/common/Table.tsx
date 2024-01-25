@@ -2,9 +2,9 @@
 import {useCallback, useMemo, useState} from 'react';
 import {Pagination} from 'app/components/common/Pagination';
 import {sort} from 'app/utils';
+import {cl} from '@builtbymom/web3/utils/cl';
 import {usePagination} from '@yearn-finance/web-lib/hooks/usePagination';
 import {IconChevronPlain} from '@yearn-finance/web-lib/icons/IconChevronPlain';
-import {cl} from '@yearn-finance/web-lib/utils/cl';
 
 import type {ReactElement} from 'react';
 

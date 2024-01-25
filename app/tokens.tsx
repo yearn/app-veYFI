@@ -1,4 +1,3 @@
-import {ImageWithFallback} from '@yearn-finance/web-lib/components/ImageWithFallback';
 import {
 	CRV_TOKEN_ADDRESS,
 	CVXCRV_TOKEN_ADDRESS,
@@ -12,6 +11,8 @@ import {
 	YVECRV_TOKEN_ADDRESS,
 	ZAP_YEARN_VE_CRV_ADDRESS
 } from '@yearn-finance/web-lib/utils/constants';
+
+import {ImageWithFallback} from './components/common/ImageWithFallback';
 
 import type {TDropdownOption} from '@yearn-finance/web-lib/types';
 

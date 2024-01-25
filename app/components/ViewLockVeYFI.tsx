@@ -11,22 +11,24 @@ import {
 	validateAmount,
 	VEYFI_CHAIN_ID
 } from 'app/utils';
+import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
+import {
+	formatAmount,
+	handleInputChangeValue,
+	isZero,
+	toAddress,
+	toBigInt,
+	toNormalizedBN
+} from '@builtbymom/web3/utils';
+import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
-import {toBigInt, toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
-import {handleInputChangeValue} from '@yearn-finance/web-lib/utils/handler';
-import {isZero} from '@yearn-finance/web-lib/utils/isZero';
 import {fromWeeks, getTimeUntil, toSeconds, toTime, toWeeks} from '@yearn-finance/web-lib/utils/time';
-import {approveERC20} from '@yearn-finance/web-lib/utils/wagmi/actions';
-import {defaultTxStatus} from '@yearn-finance/web-lib/utils/web3/transaction';
 
 import type {ReactElement} from 'react';
-import type {TNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
 import type {TMilliseconds} from '@yearn-finance/web-lib/utils/time';
+import type {TNormalizedBN} from '@builtbymom/web3/types';
 
 export function LockVeYFI(): ReactElement {
 	const [lockAmount, set_lockAmount] = useState(toNormalizedBN(0));

@@ -1,9 +1,10 @@
 import React, {Fragment, useState} from 'react';
+import {cl} from '@builtbymom/web3/utils/cl';
 import {Combobox, Transition} from '@headlessui/react';
 import {useThrottledState} from '@react-hookz/web';
-import {ImageWithFallback} from '@yearn-finance/web-lib/components/ImageWithFallback';
 import {IconChevron} from '@yearn-finance/web-lib/icons/IconChevron';
-import {cl} from '@yearn-finance/web-lib/utils/cl';
+
+import {ImageWithFallback} from './ImageWithFallback';
 
 import type {ReactElement} from 'react';
 

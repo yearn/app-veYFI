@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/router';
+import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
+import {truncateHex} from '@builtbymom/web3/utils';
 import {useAccountModal, useChainModal} from '@rainbow-me/rainbowkit';
 import {ModalMobileMenu} from '@yearn-finance/web-lib/components/ModalMobileMenu';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
 import {IconWallet} from '@yearn-finance/web-lib/icons/IconWallet';
-import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import {LogoPopover} from './HeaderPopover';
 

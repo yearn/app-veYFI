@@ -2,17 +2,16 @@ import {useCallback, useMemo, useState} from 'react';
 import {extendVeYFILockTime} from 'app/actions';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
 import {getVotingPower, MAX_LOCK_TIME, MIN_LOCK_TIME, validateAmount, VEYFI_CHAIN_ID} from 'app/utils';
+import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
+import {handleInputChangeValue, toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
+import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
-import {toBigInt, toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {handleInputChangeValue} from '@yearn-finance/web-lib/utils/handler';
 import {fromWeeks, getTimeUntil, toSeconds, toTime, toWeeks} from '@yearn-finance/web-lib/utils/time';
-import {defaultTxStatus} from '@yearn-finance/web-lib/utils/web3/transaction';
 
 import type {ReactElement} from 'react';
-import type {TNormalizedBN} from '@yearn-finance/web-lib/types';
+import type {TNormalizedBN} from '@builtbymom/web3/types';
 
 export function ExtendLockVeYFI(): ReactElement {
 	const [lockTime, set_lockTime] = useState<TNormalizedBN>(toNormalizedBN(0, 0));

@@ -3,7 +3,8 @@ import Link from 'next/link';
 import {VEYFI_DYFI_ADDRESS} from 'app/utils';
 import {APPS} from 'app/yApps';
 import {Popover, Transition} from '@headlessui/react';
-import {ImageWithFallback} from '@yearn-finance/web-lib/components/ImageWithFallback';
+
+import {ImageWithFallback} from './ImageWithFallback';
 
 import type {ReactElement} from 'react';
 

@@ -6,23 +6,20 @@ import {useOption} from 'app/contexts/useOption';
 import {useQueryArguments} from 'app/hooks/useVeYFIQueryArgs';
 import {SECONDS_PER_YEAR, VEYFI_CHAIN_ID} from 'app/utils';
 import {erc20ABI, useContractRead} from 'wagmi';
+import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
+import {formatAmount, formatPercent, toAddress, toBigInt, toNormalizedBN, truncateHex} from '@builtbymom/web3/utils';
+import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {ImageWithFallback} from '@yearn-finance/web-lib/components/ImageWithFallback';
 import {SearchBar} from '@yearn-finance/web-lib/components/SearchBar';
 import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
 import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
 import {IconLinkOut} from '@yearn-finance/web-lib/icons/IconLinkOut';
-import {toAddress, truncateHex} from '@yearn-finance/web-lib/utils/address';
-import {toBigInt, toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {formatAmount, formatPercent} from '@yearn-finance/web-lib/utils/format.number';
-import {defaultTxStatus} from '@yearn-finance/web-lib/utils/web3/transaction';
 
+import {ImageWithFallback} from './common/ImageWithFallback';
 import {Table} from './common/Table';
 
 import type {ReactElement} from 'react';
-import type {TAddress} from '@yearn-finance/web-lib/types';
-import type {TNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
+import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
 type TGaugeData = {
 	gaugeAddress: TAddress;

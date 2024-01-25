@@ -2,13 +2,13 @@ import {useCallback, useState} from 'react';
 import {withdrawUnlockedVeYFI} from 'app/actions';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
 import {VEYFI_CHAIN_ID} from 'app/utils';
+import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
+import {toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
+import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
-import {toBigInt, toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
 import {getTimeUntil} from '@yearn-finance/web-lib/utils/time';
-import {defaultTxStatus} from '@yearn-finance/web-lib/utils/web3/transaction';
 
 import type {ReactElement} from 'react';
 

@@ -1,8 +1,8 @@
 import {useMemo} from 'react';
-import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
+import {useWallet} from '@builtbymom/web3/contexts/useWallet';
+import {toAddress} from '@builtbymom/web3/utils';
 
-import type {TAddress, TToken} from '@yearn-finance/web-lib/types';
+import type {TAddress, TToken} from '@builtbymom/web3/types';
 
 export function useToken({address, chainID}: {address: string | TAddress; chainID: number}): TToken {
 	const {getToken} = useWallet();

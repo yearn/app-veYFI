@@ -4,15 +4,14 @@ import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
 import {useTokenPrice} from 'app/hooks/useTokenPrice';
 import {SECONDS_PER_YEAR, VE_YFI_GAUGES, VEYFI_CHAIN_ID} from 'app/utils';
 import {useContractRead} from 'wagmi';
+import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
+import {toAddress, toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
+import {decodeAsBigInt} from '@builtbymom/web3/utils/decoder';
+import {getClient} from '@builtbymom/web3/utils/wagmi/utils';
 import {readContracts} from '@wagmi/core';
-import {useAsyncTrigger} from '@yearn-finance/web-lib/hooks/useAsyncTrigger';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {VEYFI_ADDRESS, YFI_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
-import {decodeAsBigInt} from '@yearn-finance/web-lib/utils/decoder';
-import {toBigInt, toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {getClient} from '@yearn-finance/web-lib/utils/wagmi/utils';
 
-import type {TAddress, TNormalizedBN} from '@yearn-finance/web-lib/types';
+import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
 type TUseVeYFIAPR = {
 	dYFIPrice: number;

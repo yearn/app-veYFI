@@ -1,21 +1,21 @@
-import React, {memo} from 'react';
+import React from 'react';
 import localFont from 'next/font/local';
+import Head from 'next/head';
 import {useRouter} from 'next/router';
 import AppHeader from 'app/components/common/Header';
+import Meta from 'app/components/common/Meta';
 import {GaugeContextApp} from 'app/contexts/useGauge';
 import {OptionContextApp} from 'app/contexts/useOption';
 import {VotingEscrowContextApp} from 'app/contexts/useVotingEscrow';
-import manifest from 'public/manifest.json';
 import {AnimatePresence, motion} from 'framer-motion';
+import {WithMom} from '@builtbymom/web3/contexts/WithMom';
+import {cl} from '@builtbymom/web3/utils/cl';
+import {motionVariants} from '@builtbymom/web3/utils/helpers';
+import {localhost} from '@builtbymom/web3/utils/wagmi';
 import {Analytics} from '@vercel/analytics/react';
-import {arbitrum, base, fantom, mainnet, optimism, polygon} from '@wagmi/chains';
-import Meta from '@yearn-finance/web-lib/components/Meta';
+import {mainnet} from '@wagmi/chains';
 import {WalletContextApp} from '@yearn-finance/web-lib/contexts/useWallet';
 import {YearnContextApp} from '@yearn-finance/web-lib/contexts/useYearn';
-import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
-import {cl} from '@yearn-finance/web-lib/utils/cl';
-import {motionVariants} from '@yearn-finance/web-lib/utils/helpers';
-import {localhost} from '@yearn-finance/web-lib/utils/wagmi/networks';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
@@ -50,7 +50,6 @@ function AppWrapper(props: AppProps): ReactElement {
 
 	return (
 		<>
-			<Meta meta={manifest} />
 			<div
 				id={'app'}
 				className={cl('mx-auto mb-0 flex font-aeonik')}>
@@ -80,44 +79,6 @@ function AppWrapper(props: AppProps): ReactElement {
 }
 
 /**** 🔵 - Yearn Finance ***************************************************************************
- ** The 'App' function is a React functional component that returns a ReactElement. It uses several
- ** hooks and components to build the main structure of the application.
- **
- ** The 'useCurrentApp' hook is used to get the current app manifest.
- **
- ** The 'MenuContextApp', 'YearnContextApp', and 'WalletContextApp' are context providers that
- ** provide global state for the menu, Yearn, and wallet respectively.
- ** The 'Meta' component is used to set the meta tags for the page.
- ** The 'WithLayout' component is a higher-order component that wraps the current page component
- ** and provides layout for the page.
- **
- ** The 'NetworkStatusIndicator' component is used to display the network status.
- ** The returned JSX structure is wrapped with the context providers and includes the meta tags,
- ** layout, and network status indicator.
- **************************************************************************************************/
-const App = memo(function App(props: AppProps): ReactElement {
-	const {Component, pageProps} = props;
-
-	return (
-		<YearnContextApp>
-			<WalletContextApp>
-				<VotingEscrowContextApp>
-					<GaugeContextApp>
-						<OptionContextApp>
-							<AppWrapper
-								Component={Component}
-								pageProps={pageProps}
-								router={props.router}
-							/>
-						</OptionContextApp>
-					</GaugeContextApp>
-				</VotingEscrowContextApp>
-			</WalletContextApp>
-		</YearnContextApp>
-	);
-});
-
-/**** 🔵 - Yearn Finance ***************************************************************************
  ** The 'MyApp' function is a React functional component that returns a ReactElement. It is the main
  ** entry point of the application.
  **
@@ -131,18 +92,40 @@ const App = memo(function App(props: AppProps): ReactElement {
  **************************************************************************************************/
 function MyApp(props: AppProps): ReactElement {
 	return (
-		<main className={cl('flex flex-col h-screen', aeonik.className)}>
-			<WithYearn
-				supportedChains={[mainnet, optimism, polygon, fantom, base, arbitrum, localhost]}
-				options={{
-					baseSettings: {
-						yDaemonBaseURI: process.env.YDAEMON_BASE_URI as string
-					},
-					ui: {shouldUseThemes: false}
-				}}>
-				<App {...props} />
-			</WithYearn>
-		</main>
+		<>
+			<Head>
+				<style
+					jsx
+					global>
+					{`
+						html {
+							font-family: ${aeonik.style.fontFamily};
+						}
+					`}
+				</style>
+			</Head>
+			<Meta />
+			<WithMom
+				supportedChains={[mainnet, localhost]}
+				tokenLists={['https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/yearn.json']}>
+				<WalletContextApp>
+					<YearnContextApp>
+						<VotingEscrowContextApp>
+							<GaugeContextApp>
+								<OptionContextApp>
+									<main className={cl('flex flex-col h-screen', aeonik.className)}>
+										<main
+											className={`relative mx-auto mb-0 flex min-h-screen w-full flex-col ${aeonik.variable}`}>
+											<AppWrapper {...props} />
+										</main>
+									</main>
+								</OptionContextApp>
+							</GaugeContextApp>
+						</VotingEscrowContextApp>
+					</YearnContextApp>
+				</WalletContextApp>
+			</WithMom>
+		</>
 	);
 }
 

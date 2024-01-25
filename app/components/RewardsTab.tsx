@@ -5,22 +5,27 @@ import {useGauge} from 'app/contexts/useGauge';
 import {useOption} from 'app/contexts/useOption';
 import {useTokenPrice} from 'app/hooks/useTokenPrice';
 import {VEYFI_CHAIN_ID, VEYFI_DYFI_REWARD_POOL, VEYFI_YFI_REWARD_POOL} from 'app/utils';
+import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
+import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
+import {
+	formatCounterValue,
+	isZeroAddress,
+	toAddress,
+	toBigInt,
+	toNormalizedBN,
+	truncateHex
+} from '@builtbymom/web3/utils';
+import {YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
+import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {prepareWriteContract} from '@wagmi/core';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
 import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
-import {useAsyncTrigger} from '@yearn-finance/web-lib/hooks/useAsyncTrigger';
-import {isZeroAddress, toAddress, truncateHex} from '@yearn-finance/web-lib/utils/address';
-import {YFI_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
-import {toBigInt, toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {formatCounterValue} from '@yearn-finance/web-lib/utils/format.value';
-import {defaultTxStatus} from '@yearn-finance/web-lib/utils/web3/transaction';
 
 import {Dropdown} from './common/Dropdown';
 
 import type {ReactElement} from 'react';
-import type {TNormalizedBN} from '@yearn-finance/web-lib/types';
+import type {TNormalizedBN} from '@builtbymom/web3/types';
 import type {TDropdownOption} from './common/Dropdown';
 
 function GaugeRewards(): ReactElement {
@@ -49,7 +54,10 @@ function GaugeRewards(): ReactElement {
 	const gaugeOptions = useMemo((): TDropdownOption[] => {
 		const options: TDropdownOption[] = [];
 		for (const gauge of Object.values(gaugesMap)) {
-			if (!gauge || toBigInt(userPositionInGauge[gauge.address]?.reward?.raw) === 0n) {
+			if (!gauge) {
+				continue;
+			}
+			if (toBigInt(userPositionInGauge[gauge.address]?.reward?.raw) === 0n) {
 				continue;
 			}
 			const vault = vaults[toAddress(gauge?.vaultAddress)];
@@ -113,7 +121,7 @@ function BoostRewards(): ReactElement {
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 
 	const onRefreshClaimable = useAsyncTrigger(async (): Promise<void> => {
-		if (isZeroAddress(address)) {
+		if (isZeroAddress(address) || !provider) {
 			set_claimable(toNormalizedBN(0));
 			return;
 		}
@@ -183,7 +191,7 @@ function ExitRewards(): ReactElement {
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 
 	const onRefreshClaimable = useAsyncTrigger(async (): Promise<void> => {
-		if (isZeroAddress(address)) {
+		if (isZeroAddress(address) || !provider) {
 			set_claimable(toNormalizedBN(0));
 			return;
 		}
@@ -201,7 +209,7 @@ function ExitRewards(): ReactElement {
 			console.error(`[err - ExitRewards]: static call reverted when trying to get claimable amount.`);
 			set_claimable(toNormalizedBN(0));
 		}
-	}, [address]);
+	}, [address, provider]);
 
 	const onClaim = useCallback(async (): Promise<void> => {
 		const result = await claimBoostRewards({

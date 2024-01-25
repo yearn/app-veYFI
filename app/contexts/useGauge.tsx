@@ -2,16 +2,15 @@ import React, {createContext, memo, useCallback, useContext, useState} from 'rea
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
 import {keyBy, VE_YFI_GAUGES, VEYFI_CHAIN_ID} from 'app/utils';
 import {FixedNumber} from 'ethers';
+import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
+import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
+import {toAddress, toNormalizedBN} from '@builtbymom/web3/utils';
+import {decodeAsAddress, decodeAsBigInt, decodeAsNumber, decodeAsString} from '@builtbymom/web3/utils/decoder';
 import {useDeepCompareMemo} from '@react-hookz/web';
 import {readContracts} from '@wagmi/core';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
-import {useAsyncTrigger} from '@yearn-finance/web-lib/hooks/useAsyncTrigger';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
-import {decodeAsAddress, decodeAsBigInt, decodeAsNumber, decodeAsString} from '@yearn-finance/web-lib/utils/decoder';
-import {toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
 
 import type {ReactElement} from 'react';
-import type {TAddress, TDict, TNormalizedBN} from '@yearn-finance/web-lib/types';
+import type {TAddress, TDict, TNormalizedBN} from '@builtbymom/web3/types';
 
 export type TGauge = {
 	address: TAddress;
@@ -140,6 +139,7 @@ export const GaugeContextApp = memo(function GaugeContextApp({children}: {childr
 		for (const positions of allPositions) {
 			allPositionsAsMap[positions.address] = positions;
 		}
+
 		set_userPositionInGauge(allPositionsAsMap);
 	}, [address, gauges, isActive]);
 

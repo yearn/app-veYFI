@@ -1,11 +1,10 @@
 import {isAddress} from 'viem';
-import {allowanceKey, toAddress} from '@yearn-finance/web-lib/utils/address';
-import {toBigInt} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {isZero} from '@yearn-finance/web-lib/utils/isZero';
+import {isZero, toAddress, toBigInt} from '@builtbymom/web3/utils';
+import {allowanceKey} from '@yearn-finance/web-lib/utils/address';
 import {roundToWeek, toSeconds, YEAR} from '@yearn-finance/web-lib/utils/time';
 
-import type {TAddress, TDict} from '@yearn-finance/web-lib/types';
 import type {TMilliseconds, TSeconds, TWeeks} from '@yearn-finance/web-lib/utils/time';
+import type {TAddress, TDict} from '@builtbymom/web3/types';
 
 export const MAX_LOCK: TSeconds = toSeconds(roundToWeek(YEAR * 4));
 export const VEYFI_CHAIN_ID = 1;

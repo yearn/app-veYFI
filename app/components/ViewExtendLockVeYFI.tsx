@@ -7,7 +7,7 @@ import {handleInputChangeValue, toBigInt, toNormalizedBN} from '@builtbymom/web3
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
+import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 import {fromWeeks, getTimeUntil, toSeconds, toTime, toWeeks} from '@yearn-finance/web-lib/utils/time';
 
 import type {ReactElement} from 'react';
@@ -16,7 +16,7 @@ import type {TNormalizedBN} from '@builtbymom/web3/types';
 export function ExtendLockVeYFI(): ReactElement {
 	const [lockTime, set_lockTime] = useState<TNormalizedBN>(toNormalizedBN(0, 0));
 	const {provider, address, isActive} = useWeb3();
-	const {refresh: refreshBalances} = useWallet();
+	const {onRefresh: refreshBalances} = useYearnWallet();
 	const {votingEscrow, positions, refresh: refreshVotingEscrow} = useVotingEscrow();
 	const hasLockedAmount = toBigInt(positions?.deposit?.underlyingBalance) > 0n;
 	const willExtendLock = toBigInt(lockTime.raw) > 0n;

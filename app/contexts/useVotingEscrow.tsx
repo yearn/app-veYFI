@@ -6,8 +6,8 @@ import {erc20ABI, useContractRead, useContractReads} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {isZeroAddress, toAddress} from '@builtbymom/web3/utils';
 import {decodeAsBigInt, decodeAsNumber, decodeAsString} from '@builtbymom/web3/utils/decoder';
-import {allowanceKey} from '@yearn-finance/web-lib/utils/address';
 import {VEYFI_ADDRESS, VEYFI_POSITION_HELPER_ADDRESS, YFI_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
+import {allowanceKey} from '@yearn-finance/web-lib/utils/helpers';
 import {toMilliseconds} from '@yearn-finance/web-lib/utils/time';
 
 import type {ReactElement} from 'react';

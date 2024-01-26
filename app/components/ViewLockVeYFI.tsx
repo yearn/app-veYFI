@@ -23,7 +23,7 @@ import {
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
+import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 import {fromWeeks, getTimeUntil, toSeconds, toTime, toWeeks} from '@yearn-finance/web-lib/utils/time';
 
 import type {ReactElement} from 'react';
@@ -34,7 +34,7 @@ export function LockVeYFI(): ReactElement {
 	const [lockAmount, set_lockAmount] = useState(toNormalizedBN(0));
 	const [lockTime, set_lockTime] = useState('');
 	const {provider, address, isActive} = useWeb3();
-	const {refresh: refreshBalances} = useWallet();
+	const {onRefresh: refreshBalances} = useYearnWallet();
 	const {
 		votingEscrow,
 		positions,

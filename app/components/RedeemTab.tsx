@@ -20,14 +20,14 @@ import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {approveERC20} from '@builtbymom/web3/utils/wagmi/actions';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
+import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 
 import type {ReactElement} from 'react';
 
 export function RedeemTab(): ReactElement {
 	const [redeemAmount, set_redeemAmount] = useState(toNormalizedBN(0));
 	const {provider, address, isActive} = useWeb3();
-	const {refresh: refreshBalances} = useWallet();
+	const {onRefresh: refreshBalances} = useYearnWallet();
 	const {getRequiredEth, position: dYFIBalance, discount, refresh, dYFIPrice} = useOption();
 	const clearLockAmount = (): void => set_redeemAmount(toNormalizedBN(0));
 	const ethBalance = useToken({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only

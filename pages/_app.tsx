@@ -13,8 +13,8 @@ import {cl} from '@builtbymom/web3/utils/cl';
 import {motionVariants} from '@builtbymom/web3/utils/helpers';
 import {localhost} from '@builtbymom/web3/utils/wagmi';
 import {mainnet} from '@wagmi/chains';
-import {WalletContextApp} from '@yearn-finance/web-lib/contexts/useWallet';
 import {YearnContextApp} from '@yearn-finance/web-lib/contexts/useYearn';
+import {YearnWalletContextApp} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
@@ -104,7 +104,7 @@ function MyApp(props: AppProps): ReactElement {
 			<WithMom
 				supportedChains={[mainnet, localhost]}
 				tokenLists={['https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/yearn.json']}>
-				<WalletContextApp>
+				<YearnWalletContextApp>
 					<YearnContextApp>
 						<VotingEscrowContextApp>
 							<GaugeContextApp>
@@ -119,7 +119,7 @@ function MyApp(props: AppProps): ReactElement {
 							</GaugeContextApp>
 						</VotingEscrowContextApp>
 					</YearnContextApp>
-				</WalletContextApp>
+				</YearnWalletContextApp>
 			</WithMom>
 		</>
 	);

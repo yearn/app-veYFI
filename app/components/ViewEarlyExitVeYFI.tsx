@@ -7,14 +7,14 @@ import {toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
+import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 import {getTimeUntil, toWeeks} from '@yearn-finance/web-lib/utils/time';
 
 import type {ReactElement} from 'react';
 
 export function EarlyExitVeYFI(): ReactElement {
 	const {provider, address, isActive} = useWeb3();
-	const {refresh: refreshBalances} = useWallet();
+	const {onRefresh: refreshBalances} = useYearnWallet();
 	const {votingEscrow, positions, refresh: refreshVotingEscrow} = useVotingEscrow();
 	const timeUntilUnlock = positions?.unlockTime ? getTimeUntil(positions?.unlockTime) : undefined;
 	const weeksToUnlock = toNormalizedBN(toWeeks(timeUntilUnlock), 0);

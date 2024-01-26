@@ -11,8 +11,8 @@ import {formatAmount, formatPercent, toAddress, toBigInt, toNormalizedBN, trunca
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {SearchBar} from '@yearn-finance/web-lib/components/SearchBar';
-import {useWallet} from '@yearn-finance/web-lib/contexts/useWallet';
 import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
+import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 import {IconLinkOut} from '@yearn-finance/web-lib/icons/IconLinkOut';
 
 import {ImageWithFallback} from './common/ImageWithFallback';
@@ -38,7 +38,7 @@ type TGaugeData = {
 function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeStaked}: TGaugeData): ReactElement {
 	const {provider, address, isActive} = useWeb3();
 	const {refresh: refreshGauges} = useGauge();
-	const {refresh: refreshBalances} = useWallet();
+	const {onRefresh: refreshBalances} = useYearnWallet();
 	const [approveAndStakeStatus, set_approveAndStakeStatus] = useState(defaultTxStatus);
 	const [stakeStatus, set_stakeStatus] = useState(defaultTxStatus);
 	const [unstakeStatus, set_unstakeStatus] = useState(defaultTxStatus);
@@ -151,7 +151,7 @@ export function StakeUnstakeGauges(): ReactElement {
 	const {address} = useWeb3();
 	const {gaugesMap, userPositionInGauge} = useGauge();
 	const {vaults} = useYearn();
-	const {getBalance, getPrice} = useWallet();
+	const {getBalance, getPrice} = useYearnWallet();
 	const {dYFIPrice} = useOption();
 	const [isLoadingGauges, set_isLoadingGauges] = useState(true);
 	const {search, onSearch} = useQueryArguments();

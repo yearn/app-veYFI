@@ -1,6 +1,6 @@
 import {isAddress} from 'viem';
 import {isZero, toAddress, toBigInt} from '@builtbymom/web3/utils';
-import {allowanceKey} from '@yearn-finance/web-lib/utils/address';
+import {allowanceKey} from '@yearn-finance/web-lib/utils/helpers';
 import {roundToWeek, toSeconds, YEAR} from '@yearn-finance/web-lib/utils/time';
 
 import type {TMilliseconds, TSeconds, TWeeks} from '@yearn-finance/web-lib/utils/time';

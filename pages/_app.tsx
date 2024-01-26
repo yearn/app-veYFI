@@ -48,31 +48,29 @@ function AppWrapper(props: AppProps): ReactElement {
 	const {Component, pageProps} = props;
 
 	return (
-		<>
-			<div
-				id={'app'}
-				className={cl('mx-auto mb-0 flex font-aeonik')}>
-				<div className={'block size-full min-h-max'}>
-					<AppHeader />
-					<div className={'mx-auto my-0 max-w-6xl pt-4 md:mb-0 md:!px-0'}>
-						<AnimatePresence mode={'wait'}>
-							<motion.div
-								key={router.pathname}
-								initial={'initial'}
-								animate={'enter'}
-								exit={'exit'}
-								className={'my-0 h-full md:mb-16'}
-								variants={motionVariants}>
-								<Component
-									router={props.router}
-									{...pageProps}
-								/>
-							</motion.div>
-						</AnimatePresence>
-					</div>
+		<div
+			id={'app'}
+			className={cl('mx-auto mb-0 flex font-aeonik')}>
+			<div className={'block size-full min-h-max'}>
+				<AppHeader />
+				<div className={'mx-auto my-0 max-w-6xl pt-4 md:mb-0 md:!px-0'}>
+					<AnimatePresence mode={'wait'}>
+						<motion.div
+							key={router.pathname}
+							initial={'initial'}
+							animate={'enter'}
+							exit={'exit'}
+							className={'my-0 h-full md:mb-16'}
+							variants={motionVariants}>
+							<Component
+								router={props.router}
+								{...pageProps}
+							/>
+						</motion.div>
+					</AnimatePresence>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }
 

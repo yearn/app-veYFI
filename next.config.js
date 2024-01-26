@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import meta from './public/manifest.json';
-
+const meta = require('./public/manifest.json');
 const runtimeCaching = require('next-pwa/cache');
-
 const withPWA = require('next-pwa')({
 	dest: 'public',
 	register: true,

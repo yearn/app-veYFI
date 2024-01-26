@@ -1,13 +1,18 @@
 {
 	"name": "veYFI",
 	"short_name": "veYFI",
-	"description": "Stake YFI to take part in governance.",
+	"description": "Stake YFI to earn yield, boost gauges, and take part in governance.",
 	"iconPath": "./favicons/favicon.svg",
 	"locale": "en-US",
-	"uri": "https://yearn.fi/veyfi/",
-	"og": "https://yearn.fi/apps/veyfi-og.png",
-	"twitter": "@iearnfinance",
+	"twitter": "@yearnfi",
+	"domain": "veyfi.yearn.fi",
+	"uri": "https://veyfi.yearn.fi",
+	"og": "https://veyfi.yearn.fi/og.png",
 	"github": "https://github.com/yearn/yearn.fi",
+	"twitterURI": "https://twitter.com/yearnfi",
+	"telegramURI": "https://t.me/yearnfinance/",
+	"mediumURI": "https://medium.com/iearn",
+	"governanceURI": "https://gov.yearn.fi/",
 	"icons": [
 		{
 			"src": "./favicons/android-icon-192x192.png",

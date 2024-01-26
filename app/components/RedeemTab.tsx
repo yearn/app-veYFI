@@ -2,8 +2,6 @@ import {useCallback, useState} from 'react';
 import {redeem} from 'app/actions';
 import {useOption} from 'app/contexts/useOption';
 import {useBalance} from 'app/hooks/useBalance';
-import {useToken} from 'app/hooks/useToken';
-import {useTokenPrice} from 'app/hooks/useTokenPrice';
 import {validateAmount, VEYFI_CHAIN_ID, VEYFI_DYFI_ADDRESS, VEYFI_OPTIONS_ADDRESS} from 'app/utils';
 import {erc20ABI, useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
@@ -21,6 +19,8 @@ import {approveERC20} from '@builtbymom/web3/utils/wagmi/actions';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
+import {useYearnToken} from '@yearn-finance/web-lib/hooks/useYearnToken';
+import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPrice';
 
 import type {ReactElement} from 'react';
 
@@ -30,9 +30,9 @@ export function RedeemTab(): ReactElement {
 	const {onRefresh: refreshBalances} = useYearnWallet();
 	const {getRequiredEth, position: dYFIBalance, discount, refresh, dYFIPrice} = useOption();
 	const clearLockAmount = (): void => set_redeemAmount(toNormalizedBN(0));
-	const ethBalance = useToken({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
+	const ethBalance = useYearnToken({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
 	const yfiBalance = useBalance({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
-	const yfiPrice = useTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
+	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const [approveRedeemStatus, set_approveRedeemStatus] = useState(defaultTxStatus);
 	const [redeemStatus, set_redeemStatus] = useState(defaultTxStatus);
 	const [ethRequired, set_ethRequired] = useState(toNormalizedBN(0));

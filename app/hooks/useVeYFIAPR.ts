@@ -1,7 +1,6 @@
 import {useMemo, useState} from 'react';
 import {VEYFI_ABI} from 'app/abi/veYFI.abi';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
-import {useTokenPrice} from 'app/hooks/useTokenPrice';
 import {SECONDS_PER_YEAR, VE_YFI_GAUGES, VEYFI_CHAIN_ID} from 'app/utils';
 import {useContractRead} from 'wagmi';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
@@ -9,6 +8,7 @@ import {toAddress, toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
 import {decodeAsBigInt} from '@builtbymom/web3/utils/decoder';
 import {getClient} from '@builtbymom/web3/utils/wagmi/utils';
 import {readContracts} from '@wagmi/core';
+import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPrice';
 import {VEYFI_ADDRESS, YFI_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
 
 import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
@@ -18,7 +18,7 @@ type TUseVeYFIAPR = {
 };
 function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 	const [rate, set_rate] = useState<bigint>(0n);
-	const yfiPrice = useTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
+	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const {data: veYFISupply} = useContractRead({
 		address: VEYFI_ADDRESS,
 		abi: VEYFI_ABI,

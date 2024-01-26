@@ -1,7 +1,6 @@
 import React, {createContext, memo, useCallback, useContext, useState} from 'react';
 import {VEYFI_DYFI_ABI} from 'app/abi/veYFIdYFI.abi';
 import {VEYFI_OPTIONS_ABI} from 'app/abi/veYFIOptions.abi';
-import {useTokenPrice} from 'app/hooks/useTokenPrice';
 import {VEYFI_CHAIN_ID, VEYFI_DYFI_ADDRESS, VEYFI_OPTIONS_ADDRESS} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
@@ -9,6 +8,7 @@ import {toNormalizedBN} from '@builtbymom/web3/utils';
 import {BIG_ZERO, YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
 import {useDeepCompareMemo} from '@react-hookz/web';
 import {readContract} from '@wagmi/core';
+import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPrice';
 
 import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
@@ -35,7 +35,7 @@ export const OptionContextApp = memo(function OptionContextApp({children}: {chil
 	const [dYFIPrice, set_dYFIPrice] = useState<number>(0);
 	const [position, set_position] = useState<TNormalizedBN>(toNormalizedBN(0));
 	const [discount, set_discount] = useState<TNormalizedBN>(toNormalizedBN(0));
-	const yfiPrice = useTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
+	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 
 	const getRequiredEth = useCallback(async (amount: bigint): Promise<bigint> => {
 		try {

@@ -3,7 +3,6 @@ import {YFI_REWARD_POOL_ABI} from 'app/abi/YFIRewardPool.abi';
 import {claimBoostRewards, claimRewards} from 'app/actions';
 import {useGauge} from 'app/contexts/useGauge';
 import {useOption} from 'app/contexts/useOption';
-import {useTokenPrice} from 'app/hooks/useTokenPrice';
 import {VEYFI_CHAIN_ID, VEYFI_DYFI_REWARD_POOL, VEYFI_YFI_REWARD_POOL} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
@@ -21,6 +20,7 @@ import {prepareWriteContract} from '@wagmi/core';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
+import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPrice';
 
 import {Dropdown} from './common/Dropdown';
 
@@ -186,7 +186,7 @@ function BoostRewards(): ReactElement {
 
 function ExitRewards(): ReactElement {
 	const {provider, address} = useWeb3();
-	const yfiPrice = useTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
+	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const [claimable, set_claimable] = useState<TNormalizedBN>(toNormalizedBN(0));
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 

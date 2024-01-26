@@ -12,7 +12,6 @@ import {WithMom} from '@builtbymom/web3/contexts/WithMom';
 import {cl} from '@builtbymom/web3/utils/cl';
 import {motionVariants} from '@builtbymom/web3/utils/helpers';
 import {localhost} from '@builtbymom/web3/utils/wagmi';
-import {Analytics} from '@vercel/analytics/react';
 import {mainnet} from '@wagmi/chains';
 import {WalletContextApp} from '@yearn-finance/web-lib/contexts/useWallet';
 import {YearnContextApp} from '@yearn-finance/web-lib/contexts/useYearn';
@@ -73,7 +72,6 @@ function AppWrapper(props: AppProps): ReactElement {
 					</div>
 				</div>
 			</div>
-			<Analytics />
 		</>
 	);
 }

@@ -4,7 +4,7 @@ import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
 import {SECONDS_PER_YEAR, VE_YFI_GAUGES, VEYFI_CHAIN_ID} from 'app/utils';
 import {useContractRead} from 'wagmi';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
-import {toAddress, toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
+import {toAddress, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {decodeAsBigInt} from '@builtbymom/web3/utils/decoder';
 import {getClient} from '@builtbymom/web3/utils/wagmi/utils';
 import {readContracts} from '@wagmi/core';
@@ -56,7 +56,7 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 				toBlock: i + rangeLimit
 			});
 			for (const log of logs) {
-				depositors.push({address: toAddress(log.args.owner), gauge: log.address, balance: toNormalizedBN(0)});
+				depositors.push({address: toAddress(log.args.owner), gauge: log.address, balance: zeroNormalizedBN});
 			}
 		}
 
@@ -124,8 +124,8 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 
 	const APR = useMemo((): number => {
 		return (
-			(Number(toNormalizedBN(rate).normalized) * SECONDS_PER_YEAR * dYFIPrice) /
-			Number(toNormalizedBN(toBigInt(veYFISupply)).normalized) /
+			(Number(toNormalizedBN(rate, 18).normalized) * SECONDS_PER_YEAR * dYFIPrice) /
+			Number(toNormalizedBN(toBigInt(veYFISupply), 18).normalized) /
 			yfiPrice
 		);
 	}, [rate, dYFIPrice, yfiPrice, veYFISupply]);

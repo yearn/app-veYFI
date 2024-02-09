@@ -12,7 +12,8 @@ import {
 	toAddress,
 	toBigInt,
 	toNormalizedBN,
-	truncateHex
+	truncateHex,
+	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
@@ -37,7 +38,7 @@ function GaugeRewards(): ReactElement {
 	const refreshData = useCallback((): unknown => Promise.all([refreshGauges()]), [refreshGauges]);
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 	const selectedGaugeAddress = toAddress(selectedGauge?.id);
-	const selectedGaugeRewards = userPositionInGauge[selectedGaugeAddress]?.reward ?? toNormalizedBN(0n);
+	const selectedGaugeRewards = userPositionInGauge[selectedGaugeAddress]?.reward ?? zeroNormalizedBN;
 
 	const onClaim = useCallback(async (): Promise<void> => {
 		const result = await claimRewards({
@@ -117,12 +118,12 @@ function GaugeRewards(): ReactElement {
 function BoostRewards(): ReactElement {
 	const {isActive, provider, address} = useWeb3();
 	const {dYFIPrice} = useOption();
-	const [claimable, set_claimable] = useState<TNormalizedBN>(toNormalizedBN(0));
+	const [claimable, set_claimable] = useState<TNormalizedBN>(zeroNormalizedBN);
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 
 	const onRefreshClaimable = useAsyncTrigger(async (): Promise<void> => {
 		if (isZeroAddress(address) || !provider) {
-			set_claimable(toNormalizedBN(0));
+			set_claimable(zeroNormalizedBN);
 			return;
 		}
 		try {
@@ -136,7 +137,7 @@ function BoostRewards(): ReactElement {
 			set_claimable(toNormalizedBN(result, 18));
 		} catch (error) {
 			console.warn(`[err - BoostRewards]: static call reverted when trying to get claimable amount.`);
-			set_claimable(toNormalizedBN(0));
+			set_claimable(zeroNormalizedBN);
 		}
 	}, [address, isActive, provider]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -187,12 +188,12 @@ function BoostRewards(): ReactElement {
 function ExitRewards(): ReactElement {
 	const {provider, address} = useWeb3();
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
-	const [claimable, set_claimable] = useState<TNormalizedBN>(toNormalizedBN(0));
+	const [claimable, set_claimable] = useState<TNormalizedBN>(zeroNormalizedBN);
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 
 	const onRefreshClaimable = useAsyncTrigger(async (): Promise<void> => {
 		if (isZeroAddress(address) || !provider) {
-			set_claimable(toNormalizedBN(0));
+			set_claimable(zeroNormalizedBN);
 			return;
 		}
 		try {
@@ -207,7 +208,7 @@ function ExitRewards(): ReactElement {
 		} catch (error) {
 			console.warn(error);
 			console.error(`[err - ExitRewards]: static call reverted when trying to get claimable amount.`);
-			set_claimable(toNormalizedBN(0));
+			set_claimable(zeroNormalizedBN);
 		}
 	}, [address, provider]);
 

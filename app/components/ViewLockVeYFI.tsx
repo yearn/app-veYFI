@@ -18,7 +18,8 @@ import {
 	isZero,
 	toAddress,
 	toBigInt,
-	toNormalizedBN
+	toNormalizedBN,
+	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
@@ -31,7 +32,7 @@ import type {TMilliseconds} from '@yearn-finance/web-lib/utils/time';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
 
 export function LockVeYFI(): ReactElement {
-	const [lockAmount, set_lockAmount] = useState(toNormalizedBN(0));
+	const [lockAmount, set_lockAmount] = useState(zeroNormalizedBN);
 	const [lockTime, set_lockTime] = useState('');
 	const {provider, address, isActive} = useWeb3();
 	const {onRefresh: refreshBalances} = useYearnWallet();
@@ -64,7 +65,7 @@ export function LockVeYFI(): ReactElement {
 	}, [refreshVotingEscrow, refreshBalances]);
 
 	const onTxSuccess = useCallback(async (): Promise<void> => {
-		await Promise.all([refreshData(), set_lockAmount(toNormalizedBN(0))]);
+		await Promise.all([refreshData(), set_lockAmount(zeroNormalizedBN)]);
 	}, [refreshData]);
 
 	const onApproveLock = useCallback(async (): Promise<void> => {

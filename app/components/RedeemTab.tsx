@@ -11,7 +11,8 @@ import {
 	formatCounterValue,
 	handleInputChangeValue,
 	toAddress,
-	toNormalizedBN
+	toNormalizedBN,
+	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {ETH_TOKEN_ADDRESS, YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
@@ -25,17 +26,17 @@ import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPric
 import type {ReactElement} from 'react';
 
 export function RedeemTab(): ReactElement {
-	const [redeemAmount, set_redeemAmount] = useState(toNormalizedBN(0));
+	const [redeemAmount, set_redeemAmount] = useState(zeroNormalizedBN);
 	const {provider, address, isActive} = useWeb3();
 	const {onRefresh: refreshBalances} = useYearnWallet();
 	const {getRequiredEth, position: dYFIBalance, discount, refresh, dYFIPrice} = useOption();
-	const clearLockAmount = (): void => set_redeemAmount(toNormalizedBN(0));
+	const clearLockAmount = (): void => set_redeemAmount(zeroNormalizedBN);
 	const ethBalance = useYearnToken({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
 	const yfiBalance = useBalance({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const [approveRedeemStatus, set_approveRedeemStatus] = useState(defaultTxStatus);
 	const [redeemStatus, set_redeemStatus] = useState(defaultTxStatus);
-	const [ethRequired, set_ethRequired] = useState(toNormalizedBN(0));
+	const [ethRequired, set_ethRequired] = useState(zeroNormalizedBN);
 
 	const {data: isApproved, refetch: refreshAllowances} = useContractRead({
 		address: VEYFI_DYFI_ADDRESS,
@@ -55,7 +56,7 @@ export function RedeemTab(): ReactElement {
 
 	useAsyncTrigger(async (): Promise<void> => {
 		const result = await getRequiredEth(redeemAmount.raw);
-		set_ethRequired(toNormalizedBN(result));
+		set_ethRequired(toNormalizedBN(result, 18));
 	}, [getRequiredEth, redeemAmount.raw]);
 
 	const onApproveRedeem = useCallback(async (): Promise<void> => {

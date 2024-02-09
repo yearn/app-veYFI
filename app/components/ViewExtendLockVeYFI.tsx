@@ -3,7 +3,7 @@ import {extendVeYFILockTime} from 'app/actions';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
 import {getVotingPower, MAX_LOCK_TIME, MIN_LOCK_TIME, validateAmount, VEYFI_CHAIN_ID} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
-import {handleInputChangeValue, toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
+import {handleInputChangeValue, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
@@ -44,12 +44,13 @@ export function ExtendLockVeYFI(): ReactElement {
 
 	const votingPower = useMemo((): TNormalizedBN => {
 		if (!positions?.deposit || !newUnlockTime) {
-			return toNormalizedBN(0);
+			return zeroNormalizedBN;
 		}
 		return toNormalizedBN(
 			willExtendLock
 				? getVotingPower(positions?.deposit?.underlyingBalance, newUnlockTime)
-				: toBigInt(positions?.deposit?.balance)
+				: toBigInt(positions?.deposit?.balance),
+			18
 		);
 	}, [positions?.deposit, newUnlockTime, willExtendLock]);
 

@@ -20,7 +20,7 @@ export function ClaimVeYFI(): ReactElement {
 	const hasLockedAmount = toBigInt(positions?.deposit?.underlyingBalance) > 0n;
 	const timeUntilUnlock = positions?.unlockTime ? getTimeUntil(positions?.unlockTime) : 0;
 	const isClaimable = hasLockedAmount && !timeUntilUnlock;
-	const claimableAmount = toNormalizedBN(toBigInt(isClaimable ? positions?.deposit?.underlyingBalance : 0));
+	const claimableAmount = toNormalizedBN(toBigInt(isClaimable ? positions?.deposit?.underlyingBalance : 0), 18);
 
 	const refreshData = useCallback(async (): Promise<void> => {
 		await Promise.all([refreshVotingEscrow(), refreshBalances()]);

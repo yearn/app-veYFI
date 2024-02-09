@@ -7,7 +7,7 @@ import {useQueryArguments} from 'app/hooks/useVeYFIQueryArgs';
 import {SECONDS_PER_YEAR, VEYFI_CHAIN_ID} from 'app/utils';
 import {erc20ABI, useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
-import {formatAmount, formatPercent, toAddress, toBigInt, toNormalizedBN, truncateHex} from '@builtbymom/web3/utils';
+import {formatAmount, formatPercent, toAddress, toBigInt, truncateHex, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {SearchBar} from '@yearn-finance/web-lib/components/SearchBar';
@@ -191,7 +191,7 @@ export function StakeUnstakeGauges(): ReactElement {
 				vaultDeposited: vaultBalance,
 				gaugeAPR: APRFor10xBoost,
 				gaugeBoost: boost,
-				gaugeStaked: userPositionInGauge[gauge.address]?.deposit ?? toNormalizedBN(0),
+				gaugeStaked: userPositionInGauge[gauge.address]?.deposit ?? zeroNormalizedBN,
 				actions: undefined
 			});
 		}

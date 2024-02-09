@@ -4,7 +4,7 @@ import {VEYFI_OPTIONS_ABI} from 'app/abi/veYFIOptions.abi';
 import {VEYFI_CHAIN_ID, VEYFI_DYFI_ADDRESS, VEYFI_OPTIONS_ADDRESS} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
-import {toNormalizedBN} from '@builtbymom/web3/utils';
+import {toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {BIG_ZERO, YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
 import {useDeepCompareMemo} from '@react-hookz/web';
 import {readContract} from '@wagmi/core';
@@ -24,8 +24,8 @@ export type TOptionContext = {
 const defaultProps: TOptionContext = {
 	getRequiredEth: async (): Promise<bigint> => BIG_ZERO,
 	dYFIPrice: 0,
-	discount: toNormalizedBN(0),
-	position: toNormalizedBN(0),
+	discount: zeroNormalizedBN,
+	position: zeroNormalizedBN,
 	refresh: (): void => undefined
 };
 
@@ -33,8 +33,8 @@ const OptionContext = createContext<TOptionContext>(defaultProps);
 export const OptionContextApp = memo(function OptionContextApp({children}: {children: ReactElement}): ReactElement {
 	const {address: userAddress} = useWeb3();
 	const [dYFIPrice, set_dYFIPrice] = useState<number>(0);
-	const [position, set_position] = useState<TNormalizedBN>(toNormalizedBN(0));
-	const [discount, set_discount] = useState<TNormalizedBN>(toNormalizedBN(0));
+	const [position, set_position] = useState<TNormalizedBN>(zeroNormalizedBN);
+	const [discount, set_discount] = useState<TNormalizedBN>(zeroNormalizedBN);
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 
 	const getRequiredEth = useCallback(async (amount: bigint): Promise<bigint> => {
@@ -59,7 +59,7 @@ export const OptionContextApp = memo(function OptionContextApp({children}: {chil
 			functionName: 'discount',
 			chainId: VEYFI_CHAIN_ID
 		});
-		const discount = toNormalizedBN(discountRaw);
+		const discount = toNormalizedBN(discountRaw, 18);
 		const dYFIPrice = yfiPrice * Number(discount?.normalized || 0);
 		set_dYFIPrice(dYFIPrice);
 		set_discount(discount);
@@ -77,7 +77,7 @@ export const OptionContextApp = memo(function OptionContextApp({children}: {chil
 			args: [userAddress],
 			chainId: VEYFI_CHAIN_ID
 		});
-		set_position(toNormalizedBN(dYFIBalance));
+		set_position(toNormalizedBN(dYFIBalance, 18));
 	}, [userAddress]);
 
 	const refresh = useCallback(async (): Promise<void> => {

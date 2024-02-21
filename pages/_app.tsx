@@ -7,6 +7,7 @@ import Meta from 'app/components/common/Meta';
 import {GaugeContextApp} from 'app/contexts/useGauge';
 import {OptionContextApp} from 'app/contexts/useOption';
 import {VotingEscrowContextApp} from 'app/contexts/useVotingEscrow';
+import {arbitrum, base, fantom, optimism, polygon} from 'viem/chains';
 import {AnimatePresence, motion} from 'framer-motion';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
 import {cl} from '@builtbymom/web3/utils/cl';
@@ -102,10 +103,10 @@ function MyApp(props: AppProps): ReactElement {
 			</Head>
 			<Meta />
 			<WithMom
-				supportedChains={[mainnet, localhost]}
+				supportedChains={[mainnet, optimism, polygon, fantom, base, arbitrum, localhost]}
 				tokenLists={['https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/yearn.json']}>
-				<YearnWalletContextApp>
-					<YearnContextApp>
+				<YearnContextApp>
+					<YearnWalletContextApp>
 						<VotingEscrowContextApp>
 							<GaugeContextApp>
 								<OptionContextApp>
@@ -118,8 +119,8 @@ function MyApp(props: AppProps): ReactElement {
 								</OptionContextApp>
 							</GaugeContextApp>
 						</VotingEscrowContextApp>
-					</YearnContextApp>
-				</YearnWalletContextApp>
+					</YearnWalletContextApp>
+				</YearnContextApp>
 			</WithMom>
 		</>
 	);

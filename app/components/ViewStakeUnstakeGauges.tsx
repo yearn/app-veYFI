@@ -148,7 +148,6 @@ function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeS
 }
 
 export function StakeUnstakeGauges(): ReactElement {
-	const {address} = useWeb3();
 	const {gaugesMap, userPositionInGauge} = useGauge();
 	const {vaults} = useYearn();
 	const {getBalance, getPrice} = useYearnWallet();
@@ -331,14 +330,8 @@ export function StakeUnstakeGauges(): ReactElement {
 										<Link
 											target={'_blank'}
 											rel={'noreferrer'}
-											href={
-												address
-													? `${process.env.YEARN_BASE_URI}/vaults/${VEYFI_CHAIN_ID}/${props.vaultAddress}`
-													: ''
-											}>
-											<Button
-												isDisabled={!address}
-												className={'h-8 w-full cursor-alias text-xs'}>
+											href={`${process.env.YEARN_BASE_URI}/vaults/${VEYFI_CHAIN_ID}/${props.vaultAddress}`}>
+											<Button className={'h-8 w-full cursor-alias text-xs'}>
 												{'Deposit in vault'}
 												<IconLinkOut className={'ml-2 size-4'} />
 											</Button>

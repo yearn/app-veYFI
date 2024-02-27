@@ -328,7 +328,14 @@ export function StakeUnstakeGauges(): ReactElement {
 									toBigInt(props?.gaugeStaked.raw) === 0n
 								) {
 									return (
-										<Link href={address ? `/vaults/${VEYFI_CHAIN_ID}/${props.vaultAddress}` : ''}>
+										<Link
+											target={'_blank'}
+											rel={'noreferrer'}
+											href={
+												address
+													? `${process.env.YEARN_BASE_URI}/vaults/${VEYFI_CHAIN_ID}/${props.vaultAddress}`
+													: ''
+											}>
 											<Button
 												isDisabled={!address}
 												className={'h-8 w-full cursor-alias text-xs'}>

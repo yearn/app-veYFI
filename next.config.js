@@ -112,7 +112,7 @@ const config = {
 		RANGE_LIMIT: 1_000_000,
 
 		YDAEMON_BASE_URI: process.env.YDAEMON_BASE_URI,
-		YEARN_BASE_URI: process.env.YEARN_BASE_URI || 'https://yearn.fi',
+		YEARN_BASE_URI: 'https://yearn.fi',
 		// YDAEMON_BASE_URI: 'https://ydaemon.ycorpo.com',
 		// YDAEMON_BASE_URI: 'http://localhost:8080',
 		// YDAEMON_BASE_URI: 'https://api.ycorpo.com',

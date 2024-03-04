@@ -88,7 +88,7 @@ const nav: TMenu[] = [
 	{path: '/', label: 'veYFI'},
 	{path: 'https://snapshot.org/#/veyfi.eth', label: 'Snapshot', target: '_blank'},
 	{
-		path: 'https://docs.yearn.fi/contributing/governance/veyfi',
+		path: 'https://docs.yearn.fi/getting-started/products/veyfi',
 		label: 'Docs',
 		target: '_blank'
 	}

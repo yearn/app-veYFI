@@ -52,7 +52,7 @@ function Index(): ReactElement {
 	].filter(Boolean);
 
 	return (
-		<div>
+		<>
 			<h1 className={'w-full text-center text-8xl font-bold'}>{'veYFI'}</h1>
 
 			<div className={'my-14 w-full'}>
@@ -60,7 +60,7 @@ function Index(): ReactElement {
 			</div>
 
 			<Tabs items={tabs} />
-		</div>
+		</>
 	);
 }
 

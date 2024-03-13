@@ -13,7 +13,6 @@ import {AnimatePresence, motion} from 'framer-motion';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
 import {cl} from '@builtbymom/web3/utils/cl';
 import {motionVariants} from '@builtbymom/web3/utils/helpers';
-import {localhost} from '@builtbymom/web3/utils/wagmi';
 import {mainnet} from '@wagmi/chains';
 
 import type {AppProps} from 'next/app';
@@ -88,7 +87,7 @@ function AppWrapper(props: AppProps & {supportedNetworks: Chain[]}): ReactElemen
  ** The returned JSX structure is a main element with the 'WithYearn' and 'App' components.
  **************************************************************************************************/
 function MyApp(props: AppProps): ReactElement {
-	const supportedNetworks = [mainnet, optimism, polygon, fantom, base, arbitrum, localhost];
+	const supportedNetworks = [mainnet, optimism, polygon, fantom, base, arbitrum];
 	return (
 		<>
 			<Head>

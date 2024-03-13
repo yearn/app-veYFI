@@ -143,12 +143,6 @@ export function useYearnTokens(): TUseBalancesTokens[] {
 
 	const allTokens = useMemo((): TUseBalancesTokens[] => {
 		const tokens = [...availableTokens, ...migratableTokens, ...retiredTokens, ...availableTokenListTokens];
-		for (const token of tokens) {
-			if (token.chainID === 1) {
-				//remove it
-				tokens.push({...token, chainID: 1337});
-			}
-		}
 		return tokens;
 	}, [availableTokens, migratableTokens, retiredTokens, availableTokenListTokens]);
 

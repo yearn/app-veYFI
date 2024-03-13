@@ -995,10 +995,10 @@
     wagmi "^2.5.7"
     zod "^3.22.4"
 
-"@builtbymom/web3@^0.0.45":
-  version "0.0.45"
-  resolved "https://registry.yarnpkg.com/@builtbymom/web3/-/web3-0.0.45.tgz#bad5c008bccb31594b9cb31ab2b33653d34be1a3"
-  integrity sha512-oplY7jDTAirDQkUWPX48zV7mtIWIKW3jq3He3azYUtiUymT4JDNglEKLcbGqHYFgXdkOVsCk6b+F9ac9e8wo+Q==
+"@builtbymom/web3@^0.0.46":
+  version "0.0.46"
+  resolved "https://registry.yarnpkg.com/@builtbymom/web3/-/web3-0.0.46.tgz#8e914055f7ab653de74ae5f38d5e4f700793e32a"
+  integrity sha512-VaSy5ejaeSCDBHJfXHFnDMFHdSCNOnD6AktvVumttnNw5lrWnczscJZNcfxGwxkEaUtDaTCP3HD1Tw82mYdc4A==
   dependencies:
     "@rainbow-me/rainbowkit" "^2.0.1"
     "@react-hookz/web" "^24.0.4"
@@ -10122,6 +10122,7 @@ workbox-window@6.6.1, workbox-window@^6.5.4:
     workbox-core "6.6.1"
 
 "wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+  name wrap-ansi-cjs
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==

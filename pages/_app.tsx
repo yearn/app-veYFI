@@ -7,6 +7,7 @@ import Meta from 'app/components/common/Meta';
 import {GaugeContextApp} from 'app/contexts/useGauge';
 import {OptionContextApp} from 'app/contexts/useOption';
 import {VotingEscrowContextApp} from 'app/contexts/useVotingEscrow';
+import {YearnContextApp} from 'app/contexts/useYearn';
 import {arbitrum, base, fantom, optimism, polygon} from 'viem/chains';
 import {AnimatePresence, motion} from 'framer-motion';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
@@ -14,11 +15,10 @@ import {cl} from '@builtbymom/web3/utils/cl';
 import {motionVariants} from '@builtbymom/web3/utils/helpers';
 import {localhost} from '@builtbymom/web3/utils/wagmi';
 import {mainnet} from '@wagmi/chains';
-import {YearnContextApp} from '@yearn-finance/web-lib/contexts/useYearn';
-import {YearnWalletContextApp} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
+import type {Chain} from 'viem/chains';
 
 import '../style.css';
 
@@ -44,7 +44,7 @@ const aeonik = localFont({
 	]
 });
 
-function AppWrapper(props: AppProps): ReactElement {
+function AppWrapper(props: AppProps & {supportedNetworks: Chain[]}): ReactElement {
 	const router = useRouter();
 	const {Component, pageProps} = props;
 
@@ -53,7 +53,7 @@ function AppWrapper(props: AppProps): ReactElement {
 			id={'app'}
 			className={cl('mx-auto mb-0 flex font-aeonik w-full')}>
 			<div className={'block size-full min-h-max'}>
-				<AppHeader />
+				<AppHeader supportedNetworks={props.supportedNetworks} />
 				<div className={'mx-auto my-0 w-full max-w-6xl pt-4 md:mb-0 md:!px-0'}>
 					<AnimatePresence mode={'wait'}>
 						<motion.div
@@ -88,6 +88,7 @@ function AppWrapper(props: AppProps): ReactElement {
  ** The returned JSX structure is a main element with the 'WithYearn' and 'App' components.
  **************************************************************************************************/
 function MyApp(props: AppProps): ReactElement {
+	const supportedNetworks = [mainnet, optimism, polygon, fantom, base, arbitrum, localhost];
 	return (
 		<>
 			<Head>
@@ -103,23 +104,24 @@ function MyApp(props: AppProps): ReactElement {
 			</Head>
 			<Meta />
 			<WithMom
-				supportedChains={[mainnet, optimism, polygon, fantom, base, arbitrum, localhost]}
-				tokenLists={['https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/yearn.json']}>
+				supportedChains={supportedNetworks}
+				tokenLists={['https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/1/yearn.json']}>
 				<YearnContextApp>
-					<YearnWalletContextApp>
-						<VotingEscrowContextApp>
-							<GaugeContextApp>
-								<OptionContextApp>
-									<main className={cl('flex flex-col h-screen', aeonik.className)}>
-										<main
-											className={`relative mx-auto mb-0 flex min-h-screen w-full flex-col ${aeonik.variable}`}>
-											<AppWrapper {...props} />
-										</main>
+					<VotingEscrowContextApp>
+						<GaugeContextApp>
+							<OptionContextApp>
+								<main className={cl('flex flex-col h-screen', aeonik.className)}>
+									<main
+										className={`relative mx-auto mb-0 flex min-h-screen w-full flex-col ${aeonik.variable}`}>
+										<AppWrapper
+											supportedNetworks={supportedNetworks}
+											{...props}
+										/>
 									</main>
-								</OptionContextApp>
-							</GaugeContextApp>
-						</VotingEscrowContextApp>
-					</YearnWalletContextApp>
+								</main>
+							</OptionContextApp>
+						</GaugeContextApp>
+					</VotingEscrowContextApp>
 				</YearnContextApp>
 			</WithMom>
 		</>

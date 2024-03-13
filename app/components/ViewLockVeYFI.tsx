@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {increaseVeYFILockAmount, lockVeYFI} from 'app/actions';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
+import {useYearn} from 'app/contexts/useYearn';
 import {useBalance} from 'app/hooks/useBalance';
 import {
 	getVotingPower,
@@ -24,7 +25,6 @@ import {
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 import {fromWeeks, getTimeUntil, toSeconds, toTime, toWeeks} from '@yearn-finance/web-lib/utils/time';
 
 import type {ReactElement} from 'react';
@@ -35,7 +35,7 @@ export function LockVeYFI(): ReactElement {
 	const [lockAmount, set_lockAmount] = useState(zeroNormalizedBN);
 	const [lockTime, set_lockTime] = useState('');
 	const {provider, address, isActive} = useWeb3();
-	const {onRefresh: refreshBalances} = useYearnWallet();
+	const {onRefresh: refreshBalances} = useYearn();
 	const {
 		votingEscrow,
 		positions,

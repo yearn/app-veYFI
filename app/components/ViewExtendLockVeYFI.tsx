@@ -1,13 +1,13 @@
 import {useCallback, useMemo, useState} from 'react';
 import {extendVeYFILockTime} from 'app/actions';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
+import {useYearn} from 'app/contexts/useYearn';
 import {getVotingPower, MAX_LOCK_TIME, MIN_LOCK_TIME, validateAmount, VEYFI_CHAIN_ID} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {handleInputChangeValue, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 import {fromWeeks, getTimeUntil, toSeconds, toTime, toWeeks} from '@yearn-finance/web-lib/utils/time';
 
 import type {ReactElement} from 'react';
@@ -16,7 +16,7 @@ import type {TNormalizedBN} from '@builtbymom/web3/types';
 export function ExtendLockVeYFI(): ReactElement {
 	const [lockTime, set_lockTime] = useState<TNormalizedBN>(toNormalizedBN(0, 0));
 	const {provider, address, isActive} = useWeb3();
-	const {onRefresh: refreshBalances} = useYearnWallet();
+	const {onRefresh: refreshBalances} = useYearn();
 	const {votingEscrow, positions, refresh: refreshVotingEscrow} = useVotingEscrow();
 	const hasLockedAmount = toBigInt(positions?.deposit?.underlyingBalance) > 0n;
 	const willExtendLock = toBigInt(lockTime.raw) > 0n;

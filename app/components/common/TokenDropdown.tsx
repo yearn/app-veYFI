@@ -1,18 +1,18 @@
 import {cloneElement, Fragment, useState} from 'react';
+import {useYearn} from 'app/contexts/useYearn';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {formatAmount} from '@builtbymom/web3/utils';
 import {cl} from '@builtbymom/web3/utils/cl';
 import {Combobox, Transition} from '@headlessui/react';
 import {useThrottledState} from '@react-hookz/web';
 import {Renderable} from '@yearn-finance/web-lib/components/Renderable';
-import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 import {IconChevron} from '@yearn-finance/web-lib/icons/IconChevron';
 
 import type {ReactElement} from 'react';
 import type {TDropdownItemProps, TDropdownOption, TDropdownProps} from '@yearn-finance/web-lib/types';
 
 function DropdownItem({option}: TDropdownItemProps): ReactElement {
-	const {getBalance} = useYearnWallet();
+	const {getBalance} = useYearn();
 	const balance = getBalance({address: option.value, chainID: option.chainID});
 
 	return (

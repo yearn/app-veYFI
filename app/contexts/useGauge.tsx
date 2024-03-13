@@ -6,6 +6,7 @@ import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {toAddress, toNormalizedBN} from '@builtbymom/web3/utils';
 import {decodeAsAddress, decodeAsBigInt, decodeAsNumber, decodeAsString} from '@builtbymom/web3/utils/decoder';
+import {retrieveConfig} from '@builtbymom/web3/utils/wagmi';
 import {useDeepCompareMemo} from '@react-hookz/web';
 import {readContracts} from '@wagmi/core';
 
@@ -48,7 +49,7 @@ export const GaugeContextApp = memo(function GaugeContextApp({children}: {childr
 
 	const refreshVotingEscrow = useAsyncTrigger(async (): Promise<void> => {
 		const gaugePromises = VE_YFI_GAUGES.map(async (gaugeAddress): Promise<TGauge> => {
-			const results = await readContracts({
+			const results = await readContracts(retrieveConfig(), {
 				contracts: [
 					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'asset'},
 					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'name'},
@@ -82,7 +83,7 @@ export const GaugeContextApp = memo(function GaugeContextApp({children}: {childr
 			return;
 		}
 		const positionPromises = gauges.map(async (gauge): Promise<TGaugePosition> => {
-			const results = await readContracts({
+			const results = await readContracts(retrieveConfig(), {
 				contracts: [
 					{
 						address: toAddress(gauge.address),

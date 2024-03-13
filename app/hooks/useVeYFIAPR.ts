@@ -2,14 +2,16 @@ import {useMemo, useState} from 'react';
 import {VEYFI_ABI} from 'app/abi/veYFI.abi';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
 import {SECONDS_PER_YEAR, VE_YFI_GAUGES, VEYFI_CHAIN_ID} from 'app/utils';
-import {useContractRead} from 'wagmi';
+import {useReadContract} from 'wagmi';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {toAddress, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {decodeAsBigInt} from '@builtbymom/web3/utils/decoder';
+import {retrieveConfig} from '@builtbymom/web3/utils/wagmi';
 import {getClient} from '@builtbymom/web3/utils/wagmi/utils';
 import {readContracts} from '@wagmi/core';
-import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPrice';
 import {VEYFI_ADDRESS, YFI_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
+
+import {useYearnTokenPrice} from './useYearnTokenPrice';
 
 import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
@@ -19,7 +21,7 @@ type TUseVeYFIAPR = {
 function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 	const [rate, set_rate] = useState<bigint>(0n);
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
-	const {data: veYFISupply} = useContractRead({
+	const {data: veYFISupply} = useReadContract({
 		address: VEYFI_ADDRESS,
 		abi: VEYFI_ABI,
 		functionName: 'totalSupply',
@@ -63,7 +65,7 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		/* 🔵 - Yearn Finance **********************************************************************
 		 ** Then, for each one of theses depositors, we need to check the current boostedBalance.
 		 ******************************************************************************************/
-		const allDepositorsBalances = await readContracts({
+		const allDepositorsBalances = await readContracts(retrieveConfig(), {
 			contracts: depositors.map(({gauge, address}): any => ({
 				address: gauge,
 				abi: VEYFI_GAUGE_ABI,
@@ -97,8 +99,8 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 			calls.push({address: gauge, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'totalSupply'});
 			calls.push({address: gauge, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'rewardRate'});
 		}
-		const totalSupplyAndRewardRate = await readContracts({
-			contracts: calls
+		const totalSupplyAndRewardRate = await readContracts(retrieveConfig(), {
+			contracts: calls as any
 		});
 
 		/* 🔵 - Yearn Finance **********************************************************************

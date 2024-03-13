@@ -1,14 +1,15 @@
 import React, {createContext, memo, useCallback, useContext, useState} from 'react';
 import {VEYFI_DYFI_ABI} from 'app/abi/veYFIdYFI.abi';
 import {VEYFI_OPTIONS_ABI} from 'app/abi/veYFIOptions.abi';
+import {useYearnTokenPrice} from 'app/hooks/useYearnTokenPrice';
 import {VEYFI_CHAIN_ID, VEYFI_DYFI_ADDRESS, VEYFI_OPTIONS_ADDRESS} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {BIG_ZERO, YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
+import {retrieveConfig} from '@builtbymom/web3/utils/wagmi';
 import {useDeepCompareMemo} from '@react-hookz/web';
 import {readContract} from '@wagmi/core';
-import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPrice';
 
 import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
@@ -39,7 +40,7 @@ export const OptionContextApp = memo(function OptionContextApp({children}: {chil
 
 	const getRequiredEth = useCallback(async (amount: bigint): Promise<bigint> => {
 		try {
-			const result = await readContract({
+			const result = await readContract(retrieveConfig(), {
 				address: VEYFI_OPTIONS_ADDRESS,
 				abi: VEYFI_OPTIONS_ABI,
 				functionName: 'eth_required',
@@ -53,7 +54,7 @@ export const OptionContextApp = memo(function OptionContextApp({children}: {chil
 	}, []);
 
 	const refreshPrice = useAsyncTrigger(async (): Promise<void> => {
-		const discountRaw = await readContract({
+		const discountRaw = await readContract(retrieveConfig(), {
 			address: VEYFI_OPTIONS_ADDRESS,
 			abi: VEYFI_OPTIONS_ABI,
 			functionName: 'discount',
@@ -70,7 +71,7 @@ export const OptionContextApp = memo(function OptionContextApp({children}: {chil
 			return;
 		}
 
-		const dYFIBalance = await readContract({
+		const dYFIBalance = await readContract(retrieveConfig(), {
 			address: VEYFI_DYFI_ADDRESS,
 			abi: VEYFI_DYFI_ABI,
 			functionName: 'balanceOf',

@@ -3,16 +3,16 @@ import Link from 'next/link';
 import {approveAndStake, stake, unstake} from 'app/actions';
 import {useGauge} from 'app/contexts/useGauge';
 import {useOption} from 'app/contexts/useOption';
+import {useYearn} from 'app/contexts/useYearn';
 import {useQueryArguments} from 'app/hooks/useVeYFIQueryArgs';
 import {SECONDS_PER_YEAR, VEYFI_CHAIN_ID} from 'app/utils';
-import {erc20ABI, useContractRead} from 'wagmi';
+import {erc20Abi} from 'viem';
+import {useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {formatAmount, formatPercent, toAddress, toBigInt, truncateHex, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {SearchBar} from '@yearn-finance/web-lib/components/SearchBar';
-import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
-import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
 import {IconLinkOut} from '@yearn-finance/web-lib/icons/IconLinkOut';
 
 import {ImageWithFallback} from './common/ImageWithFallback';
@@ -38,7 +38,7 @@ type TGaugeData = {
 function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeStaked}: TGaugeData): ReactElement {
 	const {provider, address, isActive} = useWeb3();
 	const {refresh: refreshGauges} = useGauge();
-	const {onRefresh: refreshBalances} = useYearnWallet();
+	const {onRefresh: refreshBalances} = useYearn();
 	const [approveAndStakeStatus, set_approveAndStakeStatus] = useState(defaultTxStatus);
 	const [stakeStatus, set_stakeStatus] = useState(defaultTxStatus);
 	const [unstakeStatus, set_unstakeStatus] = useState(defaultTxStatus);
@@ -50,7 +50,7 @@ function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeS
 
 	const {data: allowance, refetch: refreshAllowances} = useContractRead({
 		address: vaultAddress,
-		abi: erc20ABI,
+		abi: erc20Abi,
 		chainId: VEYFI_CHAIN_ID,
 		functionName: 'allowance',
 		args: [toAddress(address), gaugeAddress]
@@ -150,7 +150,7 @@ function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeS
 export function StakeUnstakeGauges(): ReactElement {
 	const {gaugesMap, userPositionInGauge} = useGauge();
 	const {vaults} = useYearn();
-	const {getBalance, getPrice} = useYearnWallet();
+	const {getBalance, getPrice} = useYearn();
 	const {dYFIPrice} = useOption();
 	const [isLoadingGauges, set_isLoadingGauges] = useState(true);
 	const {search, onSearch} = useQueryArguments();

@@ -3,6 +3,8 @@ import {YFI_REWARD_POOL_ABI} from 'app/abi/YFIRewardPool.abi';
 import {claimBoostRewards, claimRewards} from 'app/actions';
 import {useGauge} from 'app/contexts/useGauge';
 import {useOption} from 'app/contexts/useOption';
+import {useYearn} from 'app/contexts/useYearn';
+import {useYearnTokenPrice} from 'app/hooks/useYearnTokenPrice';
 import {VEYFI_CHAIN_ID, VEYFI_DYFI_REWARD_POOL, VEYFI_YFI_REWARD_POOL} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
@@ -16,12 +18,10 @@ import {
 	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
-import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
-import {prepareWriteContract} from '@wagmi/core';
+import {defaultTxStatus, retrieveConfig} from '@builtbymom/web3/utils/wagmi';
+import {simulateContract} from '@wagmi/core';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
-import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPrice';
 
 import {Dropdown} from './common/Dropdown';
 
@@ -127,7 +127,7 @@ function BoostRewards(): ReactElement {
 			return;
 		}
 		try {
-			const {result} = await prepareWriteContract({
+			const {result} = await simulateContract(retrieveConfig(), {
 				chainId: VEYFI_CHAIN_ID,
 				address: VEYFI_DYFI_REWARD_POOL,
 				abi: YFI_REWARD_POOL_ABI,
@@ -197,7 +197,7 @@ function ExitRewards(): ReactElement {
 			return;
 		}
 		try {
-			const {result} = await prepareWriteContract({
+			const {result} = await simulateContract(retrieveConfig(), {
 				chainId: VEYFI_CHAIN_ID,
 				address: VEYFI_YFI_REWARD_POOL,
 				abi: YFI_REWARD_POOL_ABI,

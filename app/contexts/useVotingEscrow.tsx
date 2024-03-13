@@ -2,7 +2,8 @@ import {createContext, memo, useCallback, useContext, useMemo} from 'react';
 import {VEYFI_ABI} from 'app/abi/veYFI.abi';
 import {VEYFI_POSITION_HELPER_ABI} from 'app/abi/veYFIPositionHelper.abi';
 import {VEYFI_CHAIN_ID} from 'app/utils';
-import {erc20ABI, useContractRead, useContractReads} from 'wagmi';
+import {erc20Abi} from 'viem';
+import {useReadContract, useReadContracts} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {isZeroAddress, toAddress} from '@builtbymom/web3/utils';
 import {decodeAsBigInt, decodeAsNumber, decodeAsString} from '@builtbymom/web3/utils/decoder';
@@ -69,7 +70,7 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 		data: votingEscrowData,
 		status: votingEscrowStatus,
 		refetch: refreshVotingEscrow
-	} = useContractReads({
+	} = useReadContracts({
 		contracts: [
 			{...baseVeYFIContract, functionName: 'token'},
 			{...baseVeYFIContract, functionName: 'name'},
@@ -104,11 +105,13 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 		data: positionData,
 		status: positionStatus,
 		refetch: refreshPosition
-	} = useContractRead({
+	} = useReadContract({
 		...baseVeYFIPositionContract,
 		functionName: 'getPositionDetails',
 		args: [toAddress(address)],
-		enabled: isActive && address !== undefined && !isZeroAddress(address)
+		query: {
+			enabled: isActive && address !== undefined && !isZeroAddress(address)
+		}
 	});
 	const positions = useMemo((): TVotingEscrowPosition | undefined => {
 		if (!positionData || positionStatus !== 'success') {
@@ -135,12 +138,14 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 		data: allowance,
 		status: allowanceStatus,
 		refetch: refreshAllowance
-	} = useContractRead({
+	} = useReadContract({
 		address: YFI_ADDRESS,
-		abi: erc20ABI,
+		abi: erc20Abi,
 		functionName: 'allowance',
 		args: [toAddress(address), VEYFI_ADDRESS],
-		enabled: isActive && address !== undefined && !isZeroAddress(address)
+		query: {
+			enabled: isActive && address !== undefined && !isZeroAddress(address)
+		}
 	});
 	const allowances = useMemo((): TDict<bigint> => {
 		if (!address || !allowance || allowanceStatus !== 'success') {
@@ -163,7 +168,7 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 			positions,
 			allowances: allowances ?? {},
 			isLoading:
-				votingEscrowStatus === 'loading' && positionStatus === 'loading' && allowanceStatus === 'loading',
+				votingEscrowStatus === 'pending' && positionStatus === 'pending' && allowanceStatus === 'pending',
 			refresh
 		}),
 		[votingEscrow, positions, allowances, votingEscrowStatus, positionStatus, allowanceStatus, refresh]

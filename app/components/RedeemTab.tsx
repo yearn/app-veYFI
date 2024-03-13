@@ -1,9 +1,13 @@
 import {useCallback, useState} from 'react';
 import {redeem} from 'app/actions';
 import {useOption} from 'app/contexts/useOption';
+import {useYearn} from 'app/contexts/useYearn';
 import {useBalance} from 'app/hooks/useBalance';
+import {useYearnToken} from 'app/hooks/useYearnToken';
+import {useYearnTokenPrice} from 'app/hooks/useYearnTokenPrice';
 import {validateAmount, VEYFI_CHAIN_ID, VEYFI_DYFI_ADDRESS, VEYFI_OPTIONS_ADDRESS} from 'app/utils';
-import {erc20ABI, useContractRead} from 'wagmi';
+import {erc20Abi} from 'viem';
+import {useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {
@@ -19,16 +23,13 @@ import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {approveERC20} from '@builtbymom/web3/utils/wagmi/actions';
 import {AmountInput} from '@yearn-finance/web-lib/components/AmountInput';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useYearnWallet} from '@yearn-finance/web-lib/contexts/useYearnWallet';
-import {useYearnToken} from '@yearn-finance/web-lib/hooks/useYearnToken';
-import {useYearnTokenPrice} from '@yearn-finance/web-lib/hooks/useYearnTokenPrice';
 
 import type {ReactElement} from 'react';
 
 export function RedeemTab(): ReactElement {
 	const [redeemAmount, set_redeemAmount] = useState(zeroNormalizedBN);
 	const {provider, address, isActive} = useWeb3();
-	const {onRefresh: refreshBalances} = useYearnWallet();
+	const {onRefresh: refreshBalances} = useYearn();
 	const {getRequiredEth, position: dYFIBalance, discount, refresh, dYFIPrice} = useOption();
 	const clearLockAmount = (): void => set_redeemAmount(zeroNormalizedBN);
 	const ethBalance = useYearnToken({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
@@ -40,11 +41,13 @@ export function RedeemTab(): ReactElement {
 
 	const {data: isApproved, refetch: refreshAllowances} = useContractRead({
 		address: VEYFI_DYFI_ADDRESS,
-		abi: erc20ABI,
+		abi: erc20Abi,
 		chainId: VEYFI_CHAIN_ID,
 		functionName: 'allowance',
 		args: [toAddress(address), VEYFI_OPTIONS_ADDRESS],
-		select: (value: bigint): boolean => value >= redeemAmount.raw
+		query: {
+			select: (value: bigint): boolean => value >= redeemAmount.raw
+		}
 	});
 
 	const refreshData = useCallback(

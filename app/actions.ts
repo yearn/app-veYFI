@@ -1,10 +1,8 @@
-import {VEYFI_CLAIM_REWARDS_ZAP_ABI} from 'app/abi/veYFIClaimRewardsZap.abi';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
-import {BaseError} from 'viem';
-import {erc20ABI} from 'wagmi';
+import {BaseError, erc20Abi} from 'viem';
 import {assert, assertAddress, toAddress} from '@builtbymom/web3/utils';
-import {defaultTxStatus, handleTx, toWagmiProvider} from '@builtbymom/web3/utils/wagmi';
-import {prepareWriteContract, readContract} from '@wagmi/core';
+import {defaultTxStatus, handleTx, retrieveConfig, toWagmiProvider} from '@builtbymom/web3/utils/wagmi';
+import {readContract, simulateContract} from '@wagmi/core';
 
 import {VEYFI_ABI} from './abi/veYFI.abi';
 import {VEYFI_OPTIONS_ABI} from './abi/veYFIOptions.abi';
@@ -26,10 +24,10 @@ type TAllowanceOf = {
 };
 export async function allowanceOf(props: TAllowanceOf): Promise<bigint> {
 	const wagmiProvider = await toWagmiProvider(props.connector);
-	const result = await readContract({
+	const result = await readContract(retrieveConfig(), {
 		...wagmiProvider,
 		chainId: props.chainID,
-		abi: erc20ABI,
+		abi: erc20Abi,
 		address: props.tokenAddress,
 		functionName: 'allowance',
 		args: [wagmiProvider.address, props.spenderAddress]
@@ -55,7 +53,8 @@ export async function lockVeYFI(props: TLockVeYFI): Promise<TTxResponse> {
 	assert(props.amount > 0n, 'Amount is 0');
 	assertAddress(props.contractAddress);
 
-	const signerAddress = await props.connector.getAccount();
+	const accounts = await props.connector.getAccounts();
+	const [signerAddress] = accounts;
 	assertAddress(signerAddress, 'signerAddress');
 
 	return await handleTx(props, {
@@ -81,7 +80,8 @@ export async function increaseVeYFILockAmount(props: TIncreaseVeYFILockAmount): 
 	assert(props.amount > 0n, 'Amount is 0');
 	assertAddress(props.contractAddress);
 
-	const signerAddress = await props.connector.getAccount();
+	const accounts = await props.connector.getAccounts();
+	const [signerAddress] = accounts;
 	assertAddress(signerAddress, 'signerAddress');
 
 	return await handleTx(props, {
@@ -107,7 +107,8 @@ export async function extendVeYFILockTime(props: TExtendVeYFILockTime): Promise<
 	assert(props.time > 0n, 'Time is 0');
 	assertAddress(props.contractAddress);
 
-	const signerAddress = await props.connector.getAccount();
+	const accounts = await props.connector.getAccounts();
+	const [signerAddress] = accounts;
 	assertAddress(signerAddress, 'signerAddress');
 
 	return await handleTx(props, {
@@ -127,7 +128,7 @@ export async function extendVeYFILockTime(props: TExtendVeYFILockTime): Promise<
 type TGetVeYFIWithdrawPenalty = TWriteTransaction;
 export async function getVeYFIWithdrawPenalty(props: TGetVeYFIWithdrawPenalty): Promise<bigint> {
 	try {
-		const {result} = await prepareWriteContract({
+		const {result} = await simulateContract(retrieveConfig(), {
 			address: toAddress(props.contractAddress),
 			chainId: props.chainID,
 			abi: VEYFI_ABI,
@@ -209,7 +210,7 @@ export async function approveAndStake(props: TApproveAndStake): Promise<TTxRespo
 		try {
 			await handleTx(props, {
 				address: props.vaultAddress,
-				abi: erc20ABI,
+				abi: erc20Abi,
 				functionName: 'approve',
 				args: [props.contractAddress, props.amount]
 			});
@@ -306,30 +307,6 @@ export async function claimBoostRewards(props: TClaimBoostRewards): Promise<TTxR
 		abi: YFI_REWARD_POOL_ABI,
 		functionName: 'claim',
 		args: [wagmiProvider.address]
-	});
-}
-
-/* 🔵 - Yearn Finance **********************************************************
- ** claimAllRewards is a _WRITE_ function that claims all the rewards.
- **
- ** @app - veYFI
- ******************************************************************************/
-type TClaimAllRewards = TWriteTransaction & {
-	gaugeAddresses: TAddress[];
-	willLockRewards: boolean;
-	claimVotingEscrow?: boolean;
-};
-export async function claimAllRewards(props: TClaimAllRewards): Promise<TTxResponse> {
-	assertAddress(props.contractAddress, 'contractAddress');
-	for (const addr of props.gaugeAddresses) {
-		assertAddress(addr);
-	}
-
-	return await handleTx(props, {
-		address: props.contractAddress,
-		abi: VEYFI_CLAIM_REWARDS_ZAP_ABI,
-		functionName: 'claim',
-		args: [props.gaugeAddresses, props.willLockRewards, props.claimVotingEscrow]
 	});
 }
 

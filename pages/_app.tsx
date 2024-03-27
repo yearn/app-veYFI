@@ -103,7 +103,7 @@ function MyApp(props: AppProps): ReactElement {
 			</Head>
 			<Meta />
 			<WithMom
-				supportedChains={supportedNetworks}
+				supportedChains={supportedNetworks as any}
 				tokenLists={['https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/1/yearn.json']}>
 				<YearnContextApp>
 					<VotingEscrowContextApp>

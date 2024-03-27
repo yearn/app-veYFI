@@ -17,12 +17,12 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@builtbymom/web3": "^0.0.52",
+		"@builtbymom/web3": "^0.0.66",
 		"@headlessui/react": "^1.7.18",
 		"@rainbow-me/rainbowkit": "^2.0.2",
 		"@tailwindcss/typography": "^0.5.10",
 		"@wagmi/core": "^2.6.5",
-		"@yearn-finance/web-lib": "^3.0.181",
+		"@yearn-finance/web-lib": "^3.0.184",
 		"axios": "^1.6.7",
 		"framer-motion": "^11.0.12",
 		"graphql-request": "^6.1.0",

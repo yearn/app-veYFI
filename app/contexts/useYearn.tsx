@@ -1,10 +1,12 @@
-import {createContext, memo, useCallback, useContext, useEffect} from 'react';
+import {createContext, memo, useCallback, useContext, useMemo} from 'react';
+import {deserialize, serialize} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {isZeroAddress, toAddress, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
+import {useLocalStorageValue} from '@react-hookz/web';
 import {useFetchYearnEarnedForUser} from '@yearn-finance/web-lib/hooks/useFetchYearnEarnedForUser';
 import {useFetchYearnPrices} from '@yearn-finance/web-lib/hooks/useFetchYearnPrices';
-import {useFetchYearnTokens} from '@yearn-finance/web-lib/hooks/useFetchYearnTokens';
 import {useFetchYearnVaults} from '@yearn-finance/web-lib/hooks/useFetchYearnVaults';
+import {Solver} from '@yearn-finance/web-lib/utils/schemas/yDaemonTokenListBalances';
 
 import {useYearnBalances} from './useYearn.helper';
 
@@ -13,7 +15,7 @@ import type {KeyedMutator} from 'swr';
 import type {TYChainTokens, TYToken} from '@yearn-finance/web-lib/types';
 import type {TYDaemonEarned} from '@yearn-finance/web-lib/utils/schemas/yDaemonEarnedSchema';
 import type {TYDaemonPricesChain} from '@yearn-finance/web-lib/utils/schemas/yDaemonPricesSchema';
-import type {TYDaemonTokens} from '@yearn-finance/web-lib/utils/schemas/yDaemonTokensSchema';
+import type {TSolver} from '@yearn-finance/web-lib/utils/schemas/yDaemonTokenListBalances';
 import type {TYDaemonVault, TYDaemonVaults} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 import type {TUseBalancesTokens} from '@builtbymom/web3/hooks/useBalances.multichains';
 import type {TAddress, TDict, TNormalizedBN} from '@builtbymom/web3/types';
@@ -26,18 +28,27 @@ export type TYearnContext = {
 	currentPartner: TAddress;
 	earned?: TYDaemonEarned;
 	prices?: TYDaemonPricesChain;
-	tokens?: TYDaemonTokens;
 	vaults: TDict<TYDaemonVault>;
 	vaultsMigrations: TDict<TYDaemonVault>;
 	vaultsRetired: TDict<TYDaemonVault>;
 	isLoadingVaultList: boolean;
+	zapSlippage: number;
+	maxLoss: bigint;
+	zapProvider: TSolver;
+	isStakingOpBoostedVaults: boolean;
 	mutateVaultList: KeyedMutator<TYDaemonVaults>;
+	set_maxLoss: (value: bigint) => void;
+	set_zapSlippage: (value: number) => void;
+	set_zapProvider: (value: TSolver) => void;
+	set_isStakingOpBoostedVaults: (value: boolean) => void;
 	//
 	//Yearn wallet context
 	getToken: ({address, chainID}: TTokenAndChain) => TYToken;
 	getBalance: ({address, chainID}: TTokenAndChain) => TNormalizedBN;
 	getPrice: ({address, chainID}: TTokenAndChain) => TNormalizedBN;
 	balances: TYChainTokens;
+	cumulatedValueInV2Vaults: number;
+	cumulatedValueInV3Vaults: number;
 	isLoading: boolean;
 	onRefresh: (tokenList?: TUseBalancesTokens[]) => Promise<TYChainTokens>;
 };
@@ -50,7 +61,6 @@ const defaultToken: TYToken = {
 	chainID: 1,
 	value: 0,
 	stakingValue: 0,
-	price: zeroNormalizedBN,
 	balance: zeroNormalizedBN,
 	supportedZaps: []
 };
@@ -63,50 +73,67 @@ const YearnContext = createContext<TYearnContext>({
 		totalUnrealizedGainsUSD: 0
 	},
 	prices: {},
-	tokens: {},
 	vaults: {},
 	vaultsMigrations: {},
 	vaultsRetired: {},
 	isLoadingVaultList: false,
+	maxLoss: DEFAULT_MAX_LOSS,
+	zapSlippage: 0.1,
+	zapProvider: Solver.enum.Cowswap,
+	isStakingOpBoostedVaults: true,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	mutateVaultList: (): any => undefined,
+	set_maxLoss: (): void => undefined,
+	set_zapSlippage: (): void => undefined,
+	set_zapProvider: (): void => undefined,
+	set_isStakingOpBoostedVaults: (): void => undefined,
 	//
 	//Yearn wallet context
 	getToken: (): TYToken => defaultToken,
 	getBalance: (): TNormalizedBN => zeroNormalizedBN,
 	getPrice: (): TNormalizedBN => zeroNormalizedBN,
 	balances: {},
+	cumulatedValueInV2Vaults: 0,
+	cumulatedValueInV3Vaults: 0,
 	isLoading: true,
 	onRefresh: async (): Promise<TYChainTokens> => ({})
 });
 
 export const YearnContextApp = memo(function YearnContextApp({children}: {children: ReactElement}): ReactElement {
 	const {address: userAddress} = useWeb3();
+	const {value: maxLoss, set: set_maxLoss} = useLocalStorageValue<bigint>('yearn.fi/max-loss', {
+		defaultValue: DEFAULT_MAX_LOSS,
+		parse: (str, fallback): bigint => (str ? deserialize(str) : fallback ?? DEFAULT_MAX_LOSS),
+		stringify: (data: bigint): string => serialize(data)
+	});
+	const {value: zapSlippage, set: set_zapSlippage} = useLocalStorageValue<number>('yearn.fi/zap-slippage', {
+		defaultValue: DEFAULT_SLIPPAGE
+	});
+	const {value: zapProvider, set: set_zapProvider} = useLocalStorageValue<TSolver>('yearn.fi/zap-provider', {
+		defaultValue: Solver.enum.Cowswap
+	});
+	const {value: isStakingOpBoostedVaults, set: set_isStakingOpBoostedVaults} = useLocalStorageValue<boolean>(
+		'yearn.fi/staking-op-boosted-vaults',
+		{
+			defaultValue: true
+		}
+	);
+
 	const prices = useFetchYearnPrices();
-	const tokens = useFetchYearnTokens();
 	const earned = useFetchYearnEarnedForUser();
 	const {vaults, vaultsMigrations, vaultsRetired, isLoading, mutate} = useFetchYearnVaults();
-	const {tokens: balances, isLoading: isLoadingBalances, onRefresh} = useYearnBalances();
-
-	useEffect(() => {
-		const tokensToRefresh: TUseBalancesTokens[] = [];
-		for (const [chainID, tokensData] of Object.entries(tokens)) {
-			if (tokensData) {
-				for (const [address, token] of Object.entries(tokensData)) {
-					if (token) {
-						tokensToRefresh.push({address: toAddress(address), chainID: Number(chainID)});
-					}
-				}
-			}
-		}
-
-		onRefresh(tokensToRefresh);
-	}, [tokens, onRefresh]);
+	const {balances, isLoadingBalances, onRefresh} = useYearnBalances({
+		vaults,
+		vaultsMigrations,
+		vaultsRetired,
+		isLoadingVaultList: isLoading
+	});
 
 	const getToken = useCallback(
 		({address, chainID}: TTokenAndChain): TYToken => balances?.[chainID || 1]?.[address] || defaultToken,
 		[balances]
 	);
+
 	const getBalance = useCallback(
 		({address, chainID}: TTokenAndChain): TNormalizedBN => {
 			if (isZeroAddress(userAddress)) {
@@ -119,22 +146,65 @@ export const YearnContextApp = memo(function YearnContextApp({children}: {childr
 
 	const getPrice = useCallback(
 		({address, chainID}: TTokenAndChain): TNormalizedBN => {
-			const price = balances?.[chainID || 1]?.[address]?.price;
-			if (!price) {
-				return toNormalizedBN(prices?.[chainID]?.[address] || 0, 6) || zeroNormalizedBN;
-			}
-			return price;
+			return toNormalizedBN(prices?.[chainID]?.[address] || 0, 6) || zeroNormalizedBN;
 		},
-		[prices, balances]
+		[prices]
 	);
+
+	const [cumulatedValueInV2Vaults, cumulatedValueInV3Vaults] = useMemo((): [number, number] => {
+		let cumulatedValueInV2Vaults = 0;
+		let cumulatedValueInV3Vaults = 0;
+
+		for (const perChain of Object.values(balances)) {
+			for (const [tokenAddress, tokenData] of Object.entries(perChain)) {
+				if (!vaults?.[toAddress(tokenData.address)]) {
+					continue;
+				}
+				const tokenBalance = getBalance({address: tokenData.address, chainID: tokenData.chainID});
+				const tokenPrice = getPrice({address: tokenData.address, chainID: tokenData.chainID});
+				const tokenValue = tokenBalance.normalized * tokenPrice.normalized;
+
+				let stakingValue = 0;
+				const hasStaking = vaults[toAddress(tokenData.address)].staking.available;
+				if (hasStaking) {
+					const stakingAddress = vaults[toAddress(tokenData.address)].staking.address;
+					const stakingBalance = getBalance({address: stakingAddress, chainID: tokenData.chainID});
+					stakingValue = stakingBalance.normalized * tokenPrice.normalized;
+				}
+				// console.log(tokenValue, stakingValue, tokenBalance.normalized, tokenPrice.normalized);
+
+				if (vaults?.[toAddress(tokenAddress)]) {
+					if (vaults[toAddress(tokenAddress)].version.split('.')?.[0] === '3') {
+						cumulatedValueInV3Vaults += tokenValue + stakingValue;
+					} else {
+						cumulatedValueInV2Vaults += tokenValue + stakingValue;
+					}
+				} else if (vaultsMigrations?.[toAddress(tokenAddress)]) {
+					if (vaultsMigrations[toAddress(tokenAddress)].version.split('.')?.[0] === '3') {
+						cumulatedValueInV3Vaults += tokenValue + stakingValue;
+					} else {
+						cumulatedValueInV2Vaults += tokenValue + stakingValue;
+					}
+				}
+			}
+		}
+		return [cumulatedValueInV2Vaults, cumulatedValueInV3Vaults];
+	}, [balances, getBalance, getPrice, vaults, vaultsMigrations]);
 
 	return (
 		<YearnContext.Provider
 			value={{
 				currentPartner: toAddress(process.env.PARTNER_ID_ADDRESS),
 				prices,
-				tokens,
 				earned,
+				zapSlippage: zapSlippage ?? DEFAULT_SLIPPAGE,
+				maxLoss: maxLoss ?? DEFAULT_MAX_LOSS,
+				zapProvider: zapProvider ?? Solver.enum.Cowswap,
+				isStakingOpBoostedVaults: isStakingOpBoostedVaults ?? true,
+				set_zapSlippage,
+				set_maxLoss,
+				set_zapProvider,
+				set_isStakingOpBoostedVaults,
 				vaults,
 				vaultsMigrations,
 				vaultsRetired,
@@ -144,6 +214,8 @@ export const YearnContextApp = memo(function YearnContextApp({children}: {childr
 				getBalance,
 				getPrice,
 				balances: balances,
+				cumulatedValueInV2Vaults,
+				cumulatedValueInV3Vaults,
 				isLoading: isLoadingBalances || false,
 				onRefresh
 			}}>

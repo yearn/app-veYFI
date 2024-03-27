@@ -29,7 +29,7 @@ import type {ReactElement} from 'react';
 export function RedeemTab(): ReactElement {
 	const [redeemAmount, set_redeemAmount] = useState(zeroNormalizedBN);
 	const {provider, address, isActive} = useWeb3();
-	const {onRefresh: refreshBalances} = useYearn();
+	const {getPrice, onRefresh: refreshBalances} = useYearn();
 	const {getRequiredEth, position: dYFIBalance, discount, refresh, dYFIPrice} = useOption();
 	const clearLockAmount = (): void => set_redeemAmount(zeroNormalizedBN);
 	const ethBalance = useYearnToken({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
@@ -159,7 +159,7 @@ export function RedeemTab(): ReactElement {
 										className={'text-neutral-400'}>
 										{formatCounterValue(
 											ethRequired.normalized,
-											Number(ethBalance.price.normalized) ?? 0
+											getPrice({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}).normalized
 										)}
 									</p>
 									<p

@@ -15,6 +15,7 @@ import {
 	isZero,
 	toAddress,
 	toBigInt,
+	toNormalizedBN,
 	truncateHex,
 	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
@@ -308,7 +309,16 @@ export function StakeUnstakeGauges(): ReactElement {
 							columnSpan: 2,
 							sortable: true,
 							isDisabled: ({gaugeStaked}): boolean => toBigInt(gaugeStaked?.raw) === 0n,
-							format: ({gaugeStaked}): string => formatAmount(gaugeStaked?.normalized || 0, 2, 6)
+							format: ({gaugeStaked, ...a}): string => {
+								if (
+									toAddress(a.gaugeAddress) ===
+									toAddress('0x622fA41799406B120f9a40dA843D358b7b2CFEE3')
+								) {
+									const staked = toNormalizedBN(gaugeStaked?.raw, 6);
+									return formatAmount(staked?.normalized || 0, 2, 6);
+								}
+								return formatAmount(gaugeStaked?.normalized || 0, 2, 6);
+							}
 						},
 
 						{

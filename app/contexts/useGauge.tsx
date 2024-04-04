@@ -62,7 +62,11 @@ export const GaugeContextApp = memo(function GaugeContextApp({children}: {childr
 			const decimals = Number(decodeAsBigInt(results[3])) || decodeAsNumber(results[3]);
 			const totalAssets = toNormalizedBN(decodeAsBigInt(results[4]), decimals);
 
-			const rewardScale = VE_YFI_GAUGESV2.includes(toAddress(gaugeAddress)) ? 36 : 18;
+			let rewardScale = VE_YFI_GAUGESV2.includes(toAddress(gaugeAddress)) ? 36 : 18;
+			if (toAddress(gaugeAddress) === toAddress('0x622fA41799406B120f9a40dA843D358b7b2CFEE3')) {
+				rewardScale = 48;
+			}
+
 			const rewardRate = toNormalizedBN(decodeAsBigInt(results[5]), rewardScale);
 
 			return {

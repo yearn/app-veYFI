@@ -9,7 +9,15 @@ import {SECONDS_PER_YEAR, VEYFI_CHAIN_ID} from 'app/utils';
 import {erc20Abi} from 'viem';
 import {useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
-import {formatAmount, formatPercent, toAddress, toBigInt, truncateHex, zeroNormalizedBN} from '@builtbymom/web3/utils';
+import {
+	formatAmount,
+	formatPercent,
+	isZero,
+	toAddress,
+	toBigInt,
+	truncateHex,
+	zeroNormalizedBN
+} from '@builtbymom/web3/utils';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {SearchBar} from '@yearn-finance/web-lib/components/SearchBar';
@@ -180,13 +188,16 @@ export function StakeUnstakeGauges(): ReactElement {
 				APRFor10xBoost = 0;
 			}
 
+			const vaultMonthlyAPR = vault.apr.points.monthAgo;
+			const vaultWeeklyAPR = vault.apr.points.weekAgo;
+			console.log(vault);
 			data.push({
 				gaugeAddress: gauge.address,
 				vaultAddress: vault.address,
 				decimals: gauge.decimals,
 				vaultIcon: `${process.env.BASE_YEARN_ASSETS_URI}/1/${vault.address}/logo-128.png`,
 				vaultName: vault?.name ?? `Vault ${truncateHex(vault.address, 4)}`,
-				vaultApy: vault?.apr.netAPR ?? 0,
+				vaultApy: isZero(vaultMonthlyAPR) ? vaultWeeklyAPR : vaultMonthlyAPR,
 				vaultDeposited: vaultBalance,
 				gaugeAPR: APRFor10xBoost,
 				gaugeBoost: boost,

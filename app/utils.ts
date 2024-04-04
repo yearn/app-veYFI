@@ -24,16 +24,19 @@ export const MAX_LOCK_TIME: TWeeks = 208;
 export const MIN_LOCK_TIME: TWeeks = 1;
 export const MIN_LOCK_AMOUNT: TWeeks = 1;
 
-export const VE_YFI_GAUGES = [
+export const VE_YFI_GAUGESV1 = [
 	toAddress('0x7Fd8Af959B54A677a1D8F92265Bd0714274C56a3'), // YFI/ETH yVault
 	toAddress('0x28da6dE3e804bDdF0aD237CFA6048f2930D0b4Dc'), // dYFI/ETH yVault
 	toAddress('0x107717C98C8125A94D3d2Cc82b86a1b705f3A27C'), // yCRV/CRV yVault
 	toAddress('0x81d93531720d86f0491DeE7D03f30b3b5aC24e59'), // yETH/ETH yVault
-	toAddress('0x6130E6cD924a40b24703407F246966D7435D4998'), // yPrisma/Prisma yVault
+	toAddress('0x6130E6cD924a40b24703407F246966D7435D4998') // yPrisma/Prisma yVault
+];
+export const VE_YFI_GAUGESV2 = [
 	toAddress('0x622fA41799406B120f9a40dA843D358b7b2CFEE3'), // yvUSDC-1
 	toAddress('0x128e72DfD8b00cbF9d12cB75E846AC87B83DdFc9'), // yvDAI-1
 	toAddress('0x5943F7090282Eb66575662EADf7C60a717a7cE4D') // yvWETH-1
 ];
+export const VE_YFI_GAUGES = [...VE_YFI_GAUGESV1, ...VE_YFI_GAUGESV2];
 
 export function getVotingPower(lockAmount: bigint, unlockTime: TMilliseconds): bigint {
 	const duration = toSeconds(roundToWeek(unlockTime)) - toSeconds(Date.now());

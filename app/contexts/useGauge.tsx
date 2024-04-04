@@ -1,6 +1,6 @@
 import React, {createContext, memo, useCallback, useContext, useState} from 'react';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
-import {keyBy, VE_YFI_GAUGES, VEYFI_CHAIN_ID} from 'app/utils';
+import {keyBy, VE_YFI_GAUGES, VE_YFI_GAUGESV2, VEYFI_CHAIN_ID} from 'app/utils';
 import {FixedNumber} from 'ethers';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
@@ -61,7 +61,9 @@ export const GaugeContextApp = memo(function GaugeContextApp({children}: {childr
 			});
 			const decimals = Number(decodeAsBigInt(results[3])) || decodeAsNumber(results[3]);
 			const totalAssets = toNormalizedBN(decodeAsBigInt(results[4]), decimals);
-			const rewardRate = toNormalizedBN(decodeAsBigInt(results[5]), 18);
+
+			const rewardScale = VE_YFI_GAUGESV2.includes(toAddress(gaugeAddress)) ? 36 : 18;
+			const rewardRate = toNormalizedBN(decodeAsBigInt(results[5]), rewardScale);
 
 			return {
 				address: gaugeAddress,

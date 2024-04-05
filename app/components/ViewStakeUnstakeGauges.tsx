@@ -191,7 +191,6 @@ export function StakeUnstakeGauges(): ReactElement {
 
 			const vaultMonthlyAPR = vault.apr.points.monthAgo;
 			const vaultWeeklyAPR = vault.apr.points.weekAgo;
-			console.log(vault);
 			data.push({
 				gaugeAddress: gauge.address,
 				vaultAddress: vault.address,

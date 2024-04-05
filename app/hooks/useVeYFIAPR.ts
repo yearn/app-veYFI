@@ -1,7 +1,7 @@
 import {useMemo, useState} from 'react';
 import {VEYFI_ABI} from 'app/abi/veYFI.abi';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
-import {SECONDS_PER_YEAR, VE_YFI_GAUGES, VEYFI_CHAIN_ID} from 'app/utils';
+import {SECONDS_PER_YEAR, VE_YFI_GAUGES, VE_YFI_GAUGESV2, VEYFI_CHAIN_ID} from 'app/utils';
 import {useReadContract} from 'wagmi';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {toAddress, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
@@ -19,7 +19,7 @@ type TUseVeYFIAPR = {
 	dYFIPrice: number;
 };
 function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
-	const [rate, set_rate] = useState<bigint>(0n);
+	const [rate, set_rate] = useState<number>(0);
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const {data: veYFISupply} = useReadContract({
 		address: VEYFI_ADDRESS,
@@ -106,19 +106,26 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		/* 🔵 - Yearn Finance **********************************************************************
 		 ** Then we can calculate the rate for each gauge
 		 ******************************************************************************************/
-		let rate = 0n;
+		let rate = 0;
 		let index = 0;
 		for (const gauge of VE_YFI_GAUGES) {
-			const supply = decodeAsBigInt(totalSupplyAndRewardRate[index++]);
-			const rewardRate = decodeAsBigInt(totalSupplyAndRewardRate[index++]);
-			let boosted = 0n;
+			const supply = toNormalizedBN(decodeAsBigInt(totalSupplyAndRewardRate[index++]), 18);
+			const initialRewardRate = decodeAsBigInt(totalSupplyAndRewardRate[index++]);
+
+			let rewardScale = VE_YFI_GAUGESV2.includes(toAddress(gauge)) ? 36 : 18;
+			if (toAddress(gauge) === toAddress('0x622fA41799406B120f9a40dA843D358b7b2CFEE3')) {
+				rewardScale = 48;
+			}
+			const rewardRate = toNormalizedBN(initialRewardRate, rewardScale);
+
+			let boosted = 0;
 			for (const depositor of depositorsWithBalance) {
 				if (toAddress(depositor.gauge) === toAddress(gauge)) {
-					boosted += depositor.balance.raw;
+					boosted += depositor.balance.normalized;
 				}
 			}
-			if (supply > 0n) {
-				rate += (rewardRate * (supply - boosted)) / supply;
+			if (supply.raw > 0n) {
+				rate += (rewardRate.normalized * (supply.normalized - boosted)) / supply.normalized;
 			}
 		}
 		set_rate(rate);
@@ -126,7 +133,7 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 
 	const APR = useMemo((): number => {
 		return (
-			(Number(toNormalizedBN(rate, 18).normalized) * SECONDS_PER_YEAR * dYFIPrice) /
+			(rate * SECONDS_PER_YEAR * dYFIPrice) /
 			Number(toNormalizedBN(toBigInt(veYFISupply), 18).normalized) /
 			yfiPrice
 		);

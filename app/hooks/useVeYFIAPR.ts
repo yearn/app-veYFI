@@ -98,6 +98,7 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		for (const gauge of VE_YFI_GAUGES) {
 			calls.push({address: gauge, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'totalSupply'});
 			calls.push({address: gauge, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'rewardRate'});
+			calls.push({address: gauge, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'periodFinish'});
 		}
 		const totalSupplyAndRewardRate = await readContracts(retrieveConfig(), {
 			contracts: calls as any
@@ -111,6 +112,11 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		for (const gauge of VE_YFI_GAUGES) {
 			const supply = toNormalizedBN(decodeAsBigInt(totalSupplyAndRewardRate[index++]), 18);
 			const initialRewardRate = decodeAsBigInt(totalSupplyAndRewardRate[index++]);
+			const periodFinish = decodeAsBigInt(totalSupplyAndRewardRate[index++]);
+			const {timestamp} = await publicClient.getBlock();
+			if (periodFinish < timestamp) {
+				continue;
+			}
 
 			let rewardScale = VE_YFI_GAUGESV2.includes(toAddress(gauge)) ? 36 : 18;
 			if (toAddress(gauge) === toAddress('0x622fA41799406B120f9a40dA843D358b7b2CFEE3')) {

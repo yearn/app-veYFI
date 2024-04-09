@@ -37,6 +37,7 @@ type TGaugeData = {
 	vaultIcon: string;
 	vaultName: string;
 	vaultApy: number;
+	vaultVersion: 2 | 3;
 	vaultDeposited: TNormalizedBN;
 	gaugeAPR: number;
 	gaugeBoost: number;
@@ -195,10 +196,11 @@ export function StakeUnstakeGauges(): ReactElement {
 				gaugeAddress: gauge.address,
 				vaultAddress: vault.address,
 				decimals: gauge.decimals,
-				vaultIcon: `${process.env.BASE_YEARN_ASSETS_URI}/1/${vault.address}/logo-128.png`,
+				vaultIcon: `${process.env.BASE_YEARN_ASSETS_URI}/1/${vault.token.address}/logo-128.png`,
 				vaultName: vault?.name ?? `Vault ${truncateHex(vault.address, 4)}`,
 				vaultApy: isZero(vaultMonthlyAPR) ? vaultWeeklyAPR : vaultMonthlyAPR,
 				vaultDeposited: vaultBalance,
+				vaultVersion: vault.version.startsWith('3') ? 3 : 2,
 				gaugeAPR: APRFor10xBoost,
 				gaugeBoost: boost,
 				gaugeStaked: userPositionInGauge[gauge.address]?.deposit ?? zeroNormalizedBN,
@@ -350,7 +352,7 @@ export function StakeUnstakeGauges(): ReactElement {
 										<Link
 											target={'_blank'}
 											rel={'noreferrer'}
-											href={`${process.env.YEARN_BASE_URI}/vaults/${VEYFI_CHAIN_ID}/${props.vaultAddress}`}>
+											href={`${process.env.YEARN_BASE_URI}/${props.vaultVersion === 3 ? 'v3' : 'vaults'}/${VEYFI_CHAIN_ID}/${props.vaultAddress}`}>
 											<Button className={'h-8 w-full cursor-alias text-xs'}>
 												{'Deposit in vault'}
 												<IconLinkOut className={'ml-2 size-4'} />

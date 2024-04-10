@@ -166,7 +166,7 @@ export function StakeUnstakeGauges(): ReactElement {
 	const {search, onSearch} = useQueryArguments();
 
 	const gaugesData = useMemo((): TGaugeData[] => {
-		if (!vaults || Object.values(vaults).length === 0) {
+		if (!vaults || Object.values(vaults).length === 0 || !gaugesMap || Object.values(gaugesMap).length === 0) {
 			return [];
 		}
 

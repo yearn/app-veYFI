@@ -1,6 +1,6 @@
-import React, {createContext, memo, useCallback, useContext, useState} from 'react';
+import React, {createContext, memo, useCallback, useContext, useEffect, useState} from 'react';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
-import {keyBy, VE_YFI_GAUGES, VE_YFI_GAUGESV2, VEYFI_CHAIN_ID} from 'app/utils';
+import {keyBy, VE_YFI_GAUGESV2, VEYFI_CHAIN_ID} from 'app/utils';
 import {FixedNumber} from 'ethers';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
@@ -10,7 +10,10 @@ import {getClient, retrieveConfig} from '@builtbymom/web3/utils/wagmi';
 import {useDeepCompareMemo} from '@react-hookz/web';
 import {readContracts} from '@wagmi/core';
 
+import {useYearn} from './useYearn';
+
 import type {ReactElement} from 'react';
+import type {TYDaemonVaults} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 import type {TAddress, TDict, TNormalizedBN} from '@builtbymom/web3/types';
 
 export type TGauge = {
@@ -44,11 +47,24 @@ const defaultProps: TGaugeContext = {
 const GaugeContext = createContext<TGaugeContext>(defaultProps);
 export const GaugeContextApp = memo(function GaugeContextApp({children}: {children: ReactElement}): ReactElement {
 	const {address, isActive} = useWeb3();
+	const {vaults} = useYearn();
 	const [gauges, set_gauges] = useState<TGauge[]>([]);
 	const [userPositionInGauge, set_userPositionInGauge] = useState<TDict<TGaugePosition>>({});
+	const [vaultsWithGauges, set_vaultsWithGauges] = useState<TYDaemonVaults | undefined>(undefined);
+
+	useEffect(() => {
+		const _vaultsWithGauges = Object.values(vaults).filter(
+			({chainID, staking}) => chainID === 1 && staking.available && staking.source === 'VeYFI'
+		);
+		set_vaultsWithGauges(_vaultsWithGauges);
+	}, [vaults]);
 
 	const refreshVotingEscrow = useAsyncTrigger(async (): Promise<void> => {
-		const gaugePromises = VE_YFI_GAUGES.map(async (gaugeAddress): Promise<TGauge> => {
+		if (!vaultsWithGauges || vaultsWithGauges.length === 0) {
+			return;
+		}
+		const gaugePromises = vaultsWithGauges.map(async (vault): Promise<TGauge> => {
+			const gaugeAddress = vault.staking.address;
 			const results = await readContracts(retrieveConfig(), {
 				contracts: [
 					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'asset'},
@@ -87,10 +103,10 @@ export const GaugeContextApp = memo(function GaugeContextApp({children}: {childr
 
 		const allGauges = await Promise.all(gaugePromises);
 		set_gauges(allGauges);
-	}, []);
+	}, [vaultsWithGauges]);
 
 	const refreshPositions = useAsyncTrigger(async (): Promise<void> => {
-		if (!gauges || !isActive || !address) {
+		if (!gauges || !isActive || !address || gauges.length === 0) {
 			return;
 		}
 		const positionPromises = gauges.map(async (gauge): Promise<TGaugePosition> => {

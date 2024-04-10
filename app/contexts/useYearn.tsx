@@ -121,7 +121,7 @@ export const YearnContextApp = memo(function YearnContextApp({children}: {childr
 
 	const prices = useFetchYearnPrices();
 	const earned = useFetchYearnEarnedForUser();
-	const {vaults, vaultsMigrations, vaultsRetired, isLoading, mutate} = useFetchYearnVaults();
+	const {vaults, vaultsMigrations, vaultsRetired, isLoading, mutate} = useFetchYearnVaults([1]);
 	const {balances, isLoadingBalances, onRefresh} = useYearnBalances({
 		vaults,
 		vaultsMigrations,

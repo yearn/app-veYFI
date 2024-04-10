@@ -1,7 +1,8 @@
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {VEYFI_ABI} from 'app/abi/veYFI.abi';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
-import {SECONDS_PER_YEAR, VE_YFI_GAUGES, VE_YFI_GAUGESV2, VEYFI_CHAIN_ID} from 'app/utils';
+import {useYearn} from 'app/contexts/useYearn';
+import {SECONDS_PER_YEAR, VE_YFI_GAUGESV2, VEYFI_CHAIN_ID} from 'app/utils';
 import {useReadContract} from 'wagmi';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {toAddress, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
@@ -13,13 +14,14 @@ import {VEYFI_ADDRESS, YFI_ADDRESS} from '@yearn-finance/web-lib/utils/constants
 
 import {useYearnTokenPrice} from './useYearnTokenPrice';
 
+import type {TYDaemonVaults} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
 type TUseVeYFIAPR = {
 	dYFIPrice: number;
 };
 function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
-	const [rate, set_rate] = useState<number>(0);
+	const {vaults} = useYearn();
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const {data: veYFISupply} = useReadContract({
 		address: VEYFI_ADDRESS,
@@ -27,20 +29,33 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		functionName: 'totalSupply',
 		chainId: VEYFI_CHAIN_ID
 	});
+	const [rate, set_rate] = useState<number>(0);
+	const [vaultsWithGauges, set_vaultsWithGauges] = useState<TYDaemonVaults | undefined>(undefined);
+
+	useEffect(() => {
+		const _vaultsWithGauges = Object.values(vaults).filter(
+			({chainID, staking}) => chainID === 1 && staking.available && staking.source === 'VeYFI'
+		);
+		set_vaultsWithGauges(_vaultsWithGauges);
+	}, [vaults]);
 
 	useAsyncTrigger(async (): Promise<void> => {
+		if (!vaultsWithGauges?.length) {
+			return;
+		}
 		const publicClient = getClient(VEYFI_CHAIN_ID);
 		const rangeLimit = toBigInt(process.env.RANGE_LIMIT);
 		const currentBlockNumber = await publicClient.getBlockNumber();
 		const from = 18373500n;
 
 		const depositors: [{address: TAddress; gauge: TAddress; balance: TNormalizedBN}] = [] as any;
+		const gaugesAddresses = vaultsWithGauges.map(({staking}) => toAddress(staking.address));
 		/* 🔵 - Yearn Finance **********************************************************************
 		 ** First we need to retrieve all the depositors in a gauge
 		 ******************************************************************************************/
 		for (let i = from; i < currentBlockNumber; i += rangeLimit) {
 			const logs = await publicClient.getLogs({
-				address: VE_YFI_GAUGES,
+				address: gaugesAddresses,
 				events: [
 					{
 						anonymous: false,
@@ -95,7 +110,8 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		 ** Then, for each gauge we need to know the totalSupply and the rewardRate
 		 ******************************************************************************************/
 		const calls = [];
-		for (const gauge of VE_YFI_GAUGES) {
+		for (const vault of vaultsWithGauges) {
+			const gauge = toAddress(vault.staking.address);
 			calls.push({address: gauge, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'totalSupply'});
 			calls.push({address: gauge, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'rewardRate'});
 			calls.push({address: gauge, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'periodFinish'});
@@ -109,7 +125,8 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		 ******************************************************************************************/
 		let rate = 0;
 		let index = 0;
-		for (const gauge of VE_YFI_GAUGES) {
+		for (const vault of vaultsWithGauges) {
+			const gauge = toAddress(vault.staking.address);
 			const supply = toNormalizedBN(decodeAsBigInt(totalSupplyAndRewardRate[index++]), 18);
 			const initialRewardRate = decodeAsBigInt(totalSupplyAndRewardRate[index++]);
 			const periodFinish = decodeAsBigInt(totalSupplyAndRewardRate[index++]);
@@ -135,7 +152,7 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 			}
 		}
 		set_rate(rate);
-	}, []);
+	}, [vaultsWithGauges]);
 
 	const APR = useMemo((): number => {
 		return (

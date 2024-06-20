@@ -2,9 +2,6 @@
 	"compilerOptions": {
 		"rootDirs": ["."],
 		"baseUrl": ".",
-		"paths": {
-			"@yCRV/*": ["app/ycrv/*"]
-		},
 		/* Basic Options */
 		"target": "esnext",
 		"module": "esnext",

@@ -1,17 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 const meta = require('./public/manifest.json');
-const runtimeCaching = require('next-pwa/cache');
-const withPWA = require('next-pwa')({
-	dest: 'public',
-	register: true,
-	skipWaiting: true,
-	runtimeCaching,
-	buildExcludes: [/middleware-manifest.json$/]
-});
-
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-	enabled: process.env.ANALYZE === 'true'
-});
 
 const config = {
 	images: {
@@ -34,10 +22,6 @@ const config = {
 			}
 		]
 	},
-	experimental: {
-		webpackBuildWorker: true
-	},
-	swcMinify: false,
 	async rewrites() {
 		return [
 			{
@@ -122,4 +106,4 @@ const config = {
 	}
 };
 
-module.exports = process.env.NODE_ENV === 'development' ? withBundleAnalyzer(config) : withPWA(config);
+module.exports = config;

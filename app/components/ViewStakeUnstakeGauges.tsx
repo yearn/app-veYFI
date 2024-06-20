@@ -260,19 +260,21 @@ export function StakeUnstakeGauges(): ReactElement {
 							sortable: true,
 							fullWidth: true,
 							className: 'my-4 md:my-0',
-							transform: ({vaultIcon, vaultName}): ReactElement => (
-								<div className={'flex flex-row items-center space-x-4 md:space-x-6'}>
-									<div className={'flex size-8 min-h-[32px] min-w-[32px] rounded-full'}>
-										<ImageWithFallback
-											alt={vaultName}
-											width={32}
-											height={32}
-											src={vaultIcon}
-										/>
+							transform: ({vaultIcon, vaultName}): ReactElement => {
+								return (
+									<div className={'flex flex-row items-center space-x-4 md:space-x-6'}>
+										<div className={'flex size-8 min-h-[32px] min-w-[32px] rounded-full'}>
+											<ImageWithFallback
+												alt={vaultName}
+												width={32}
+												height={32}
+												src={vaultIcon}
+											/>
+										</div>
+										<p>{vaultName}</p>
 									</div>
-									<p>{vaultName}</p>
-								</div>
-							)
+								);
+							}
 						},
 						{
 							key: 'vaultApy',

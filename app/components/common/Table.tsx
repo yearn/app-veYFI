@@ -190,9 +190,7 @@ export function Table<T>({
 										)}
 										<div
 											className={cl(
-												isDisabled && isDisabled?.(item)
-													? 'text-neutral-400'
-													: 'text-neutral-900',
+												isDisabled?.(item) ? 'text-neutral-400' : 'text-neutral-900',
 												isNumber ? 'font-number' : 'font-aeonik',
 												fullWidth ? 'w-full' : undefined
 											)}>

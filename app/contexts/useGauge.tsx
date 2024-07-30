@@ -1,12 +1,12 @@
 import React, {createContext, memo, useCallback, useContext, useEffect, useState} from 'react';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
-import {keyBy, VE_YFI_GAUGESV2, VEYFI_CHAIN_ID} from 'app/utils';
+import {keyBy, VEYFI_CHAIN_ID} from 'app/utils';
 import {FixedNumber} from 'ethers';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {toAddress, toNormalizedBN} from '@builtbymom/web3/utils';
 import {decodeAsAddress, decodeAsBigInt, decodeAsNumber, decodeAsString} from '@builtbymom/web3/utils/decoder';
-import {getClient, retrieveConfig} from '@builtbymom/web3/utils/wagmi';
+import {retrieveConfig} from '@builtbymom/web3/utils/wagmi';
 import {useDeepCompareMemo} from '@react-hookz/web';
 import {readContracts} from '@wagmi/core';
 
@@ -22,8 +22,6 @@ export type TGauge = {
 	name: string;
 	symbol: string;
 	decimals: number;
-	totalStaked: TNormalizedBN;
-	rewardRate: TNormalizedBN;
 };
 
 export type TGaugePosition = {
@@ -70,34 +68,16 @@ export const GaugeContextApp = memo(function GaugeContextApp({children}: {childr
 					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'asset'},
 					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'name'},
 					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'symbol'},
-					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'decimals'},
-					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'totalAssets'},
-					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'rewardRate'},
-					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'periodFinish'}
+					{address: gaugeAddress, abi: VEYFI_GAUGE_ABI, chainId: VEYFI_CHAIN_ID, functionName: 'decimals'}
 				]
 			});
 			const decimals = Number(decodeAsBigInt(results[3])) || decodeAsNumber(results[3]);
-			const totalAssets = toNormalizedBN(decodeAsBigInt(results[4]), decimals);
-			let rewardScale = VE_YFI_GAUGESV2.includes(toAddress(gaugeAddress)) ? 36 : 18;
-			if (toAddress(gaugeAddress) === toAddress('0x622fA41799406B120f9a40dA843D358b7b2CFEE3')) {
-				rewardScale = 48;
-			}
-
-			let rewardRate = toNormalizedBN(decodeAsBigInt(results[5]), rewardScale);
-			const periodFinish = decodeAsBigInt(results[6]);
-			const publicClient = getClient(VEYFI_CHAIN_ID);
-			const {timestamp} = await publicClient.getBlock();
-			if (periodFinish < timestamp) {
-				rewardRate = toNormalizedBN(0n, rewardScale);
-			}
 			return {
 				address: gaugeAddress,
 				vaultAddress: decodeAsAddress(results[0]),
 				name: decodeAsString(results[1]),
 				symbol: decodeAsString(results[2]),
-				decimals: decimals,
-				totalStaked: totalAssets,
-				rewardRate
+				decimals: decimals
 			};
 		});
 

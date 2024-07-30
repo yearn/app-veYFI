@@ -2,10 +2,9 @@ import {useCallback, useMemo, useState} from 'react';
 import Link from 'next/link';
 import {approveAndStake, stake, unstake} from 'app/actions';
 import {useGauge} from 'app/contexts/useGauge';
-import {useOption} from 'app/contexts/useOption';
 import {useYearn} from 'app/contexts/useYearn';
 import {useQueryArguments} from 'app/hooks/useVeYFIQueryArgs';
-import {SECONDS_PER_YEAR, VEYFI_CHAIN_ID} from 'app/utils';
+import {VEYFI_CHAIN_ID} from 'app/utils';
 import {erc20Abi} from 'viem';
 import {useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
@@ -160,8 +159,7 @@ function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeS
 export function StakeUnstakeGauges(): ReactElement {
 	const {gaugesMap, userPositionInGauge} = useGauge();
 	const {vaults} = useYearn();
-	const {getBalance, getPrice} = useYearn();
-	const {dYFIPrice} = useOption();
+	const {getBalance} = useYearn();
 	const [isLoadingGauges, set_isLoadingGauges] = useState(true);
 	const {search, onSearch} = useQueryArguments();
 
@@ -178,18 +176,8 @@ export function StakeUnstakeGauges(): ReactElement {
 			}
 
 			const vaultBalance = getBalance({address: vault.address, chainID: vault.chainID});
-			const tokenPrice = getPrice({address: vault.address, chainID: vault.chainID});
 			const boost = Number(userPositionInGauge[gauge.address]?.boost || 1);
-			let APRFor10xBoost =
-				((Number(gauge?.rewardRate.normalized || 0) * dYFIPrice * SECONDS_PER_YEAR) /
-					Number(gauge?.totalStaked.normalized || 0) /
-					Number(tokenPrice.normalized || 0)) *
-				100;
-
-			if (tokenPrice.raw === 0n || Number(gauge?.totalStaked.normalized || 0) === 0) {
-				APRFor10xBoost = 0;
-			}
-
+			const APRFor10xBoost = vault.apr.extra.stakingRewardsAPR * 100;
 			const vaultMonthlyAPR = vault.apr.points.monthAgo;
 			const vaultWeeklyAPR = vault.apr.points.weekAgo;
 			data.push({
@@ -209,7 +197,7 @@ export function StakeUnstakeGauges(): ReactElement {
 		}
 		set_isLoadingGauges(false);
 		return data;
-	}, [vaults, gaugesMap, getBalance, getPrice, userPositionInGauge, dYFIPrice]);
+	}, [vaults, gaugesMap, getBalance, userPositionInGauge]);
 
 	const searchedGaugesData = useMemo((): TGaugeData[] => {
 		if (!search) {

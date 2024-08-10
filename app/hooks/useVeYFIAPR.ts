@@ -1,8 +1,8 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {VEYFI_ABI} from 'app/abi/veYFI.abi';
 import {VEYFI_GAUGE_ABI} from 'app/abi/veYFIGauge.abi';
 import {useYearn} from 'app/contexts/useYearn';
-import {SECONDS_PER_YEAR, VE_YFI_GAUGESV2, VEYFI_CHAIN_ID} from 'app/utils';
+import {SECONDS_PER_YEAR, VE_YFI_GAUGESV1, VEYFI_CHAIN_ID} from 'app/utils';
 import {useReadContract} from 'wagmi';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {toAddress, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
@@ -31,6 +31,7 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 	});
 	const [rate, set_rate] = useState<number>(0);
 	const [vaultsWithGauges, set_vaultsWithGauges] = useState<TYDaemonVaults | undefined>(undefined);
+	const isRunning = useRef(false);
 
 	useEffect(() => {
 		const _vaultsWithGauges = Object.values(vaults).filter(
@@ -43,6 +44,10 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		if (!vaultsWithGauges?.length) {
 			return;
 		}
+		if (isRunning.current) {
+			return;
+		}
+		isRunning.current = true;
 		const publicClient = getClient(VEYFI_CHAIN_ID);
 		const rangeLimit = toBigInt(process.env.RANGE_LIMIT);
 		const currentBlockNumber = await publicClient.getBlockNumber();
@@ -125,6 +130,7 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		 ******************************************************************************************/
 		let rate = 0;
 		let index = 0;
+		console.warn(vaultsWithGauges);
 		for (const vault of vaultsWithGauges) {
 			const gauge = toAddress(vault.staking.address);
 			const supply = toNormalizedBN(decodeAsBigInt(totalSupplyAndRewardRate[index++]), 18);
@@ -135,7 +141,7 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 				continue;
 			}
 
-			let rewardScale = VE_YFI_GAUGESV2.includes(toAddress(gauge)) ? 36 : 18;
+			let rewardScale = VE_YFI_GAUGESV1.includes(toAddress(gauge)) ? 18 : 36;
 			if (toAddress(gauge) === toAddress('0x622fA41799406B120f9a40dA843D358b7b2CFEE3')) {
 				rewardScale = 48;
 			}
@@ -148,18 +154,20 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 				}
 			}
 			if (supply.raw > 0n) {
-				rate += (rewardRate.normalized * (supply.normalized - boosted)) / supply.normalized;
+				const newRateItem = (rewardRate.normalized * (supply.normalized - boosted)) / supply.normalized;
+				rate += newRateItem;
 			}
 		}
 		set_rate(rate);
+		isRunning.current = false;
 	}, [vaultsWithGauges]);
 
 	const APR = useMemo((): number => {
-		return (
+		const apr =
 			(rate * SECONDS_PER_YEAR * dYFIPrice) /
 			Number(toNormalizedBN(toBigInt(veYFISupply), 18).normalized) /
-			yfiPrice
-		);
+			yfiPrice;
+		return apr;
 	}, [rate, dYFIPrice, yfiPrice, veYFISupply]);
 
 	return APR;

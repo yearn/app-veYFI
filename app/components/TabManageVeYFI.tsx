@@ -18,12 +18,12 @@ export function TabManageVeYFI(): ReactElement {
 	return (
 		<div className={'grid gap-10'}>
 			<LockVeYFI />
-			<div className={hasLock && weeksToUnlock > 0 ? 'grid gap-10' : 'grid gap-10 opacity-40'}>
-				<div className={'h-[1px] w-full bg-neutral-300'} />
+			<div className={hasLock && weeksToUnlock >= 0 ? 'grid gap-10' : 'grid gap-10 opacity-40'}>
+				<div className={'h-px w-full bg-neutral-300'} />
 				<ExtendLockVeYFI />
-				<div className={'h-[1px] w-full bg-neutral-300'} />
+				<div className={'h-px w-full bg-neutral-300'} />
 				<EarlyExitVeYFI />
-				<div className={'h-[1px] w-full bg-neutral-300'} />
+				<div className={'h-px w-full bg-neutral-300'} />
 				<ClaimVeYFI />
 			</div>
 		</div>

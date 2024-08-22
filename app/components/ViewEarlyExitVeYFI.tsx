@@ -71,7 +71,7 @@ export function EarlyExitVeYFI(): ReactElement {
 						onClick={onWithdrawLocked}
 						isBusy={withdrawLockedStatus.pending}
 						isDisabled={
-							!isActive || !hasPenalty || withdrawLockedStatus.pending || !votingEscrow || !address
+							!isActive || hasPenalty || withdrawLockedStatus.pending || !votingEscrow || !address
 						}>
 						{'Exit'}
 					</Button>

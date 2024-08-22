@@ -65,7 +65,7 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 	 ** Retrieving the basic information of the veYFI contract. They are not linked
 	 ** to the user's address, so they are not affected by the `isActive` flag.
 	 ******************************************************************************/
-	const baseVeYFIContract = {address: VEYFI_ADDRESS, abi: VEYFI_ABI};
+	const baseVeYFIContract = {address: VEYFI_ADDRESS, abi: VEYFI_ABI, chainId: VEYFI_CHAIN_ID};
 	const {
 		data: votingEscrowData,
 		status: votingEscrowStatus,
@@ -107,6 +107,7 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 		refetch: refreshPosition
 	} = useReadContract({
 		...baseVeYFIPositionContract,
+		chainId: VEYFI_CHAIN_ID,
 		functionName: 'getPositionDetails',
 		args: [toAddress(address)],
 		query: {
@@ -141,6 +142,7 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 	} = useReadContract({
 		address: YFI_ADDRESS,
 		abi: erc20Abi,
+		chainId: VEYFI_CHAIN_ID,
 		functionName: 'allowance',
 		args: [toAddress(address), VEYFI_ADDRESS],
 		query: {

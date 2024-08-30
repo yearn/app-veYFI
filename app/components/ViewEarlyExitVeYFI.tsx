@@ -18,7 +18,6 @@ export function EarlyExitVeYFI(): ReactElement {
 	const {votingEscrow, positions, refresh: refreshVotingEscrow} = useVotingEscrow();
 	const timeUntilUnlock = positions?.unlockTime ? getTimeUntil(positions?.unlockTime) : undefined;
 	const weeksToUnlock = toNormalizedBN(toWeeks(timeUntilUnlock), 0);
-	const hasPenalty = toBigInt(positions?.penalty) > 0n;
 	const [withdrawLockedStatus, set_withdrawLockedStatus] = useState(defaultTxStatus);
 
 	const onTxSuccess = useCallback(async (): Promise<void> => {
@@ -71,7 +70,11 @@ export function EarlyExitVeYFI(): ReactElement {
 						onClick={onWithdrawLocked}
 						isBusy={withdrawLockedStatus.pending}
 						isDisabled={
-							!isActive || hasPenalty || withdrawLockedStatus.pending || !votingEscrow || !address
+							!isActive ||
+							withdrawLockedStatus.pending ||
+							!votingEscrow ||
+							!address ||
+							toBigInt(positions?.withdrawable) === 0n
 						}>
 						{'Exit'}
 					</Button>

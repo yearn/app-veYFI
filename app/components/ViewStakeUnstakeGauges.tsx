@@ -38,7 +38,7 @@ type TGaugeData = {
 	vaultApy: number;
 	vaultVersion: 2 | 3;
 	vaultDeposited: TNormalizedBN;
-	gaugeAPR: number;
+	gaugeAPY: number;
 	gaugeBoost: number;
 	gaugeStaked: TNormalizedBN;
 	actions: undefined;
@@ -177,19 +177,19 @@ export function StakeUnstakeGauges(): ReactElement {
 
 			const vaultBalance = getBalance({address: vault.address, chainID: vault.chainID});
 			const boost = Number(userPositionInGauge[gauge.address]?.boost || 1);
-			const APRFor10xBoost = vault.apr.extra.stakingRewardsAPR * 100;
-			const vaultMonthlyAPR = vault.apr.points.monthAgo;
-			const vaultWeeklyAPR = vault.apr.points.weekAgo;
+			const APYFor10xBoost = vault.apr.extra.stakingRewardsAPR * 100;
+			const vaultMonthlyAPY = vault.apr.points.monthAgo;
+			const vaultWeeklyAPY = vault.apr.points.weekAgo;
 			data.push({
 				gaugeAddress: gauge.address,
 				vaultAddress: vault.address,
 				decimals: gauge.decimals,
 				vaultIcon: `${process.env.BASE_YEARN_ASSETS_URI}/1/${vault.token.address}/logo-128.png`,
 				vaultName: vault?.name ?? `Vault ${truncateHex(vault.address, 4)}`,
-				vaultApy: isZero(vaultMonthlyAPR) ? vaultWeeklyAPR : vaultMonthlyAPR,
+				vaultApy: isZero(vaultMonthlyAPY) ? vaultWeeklyAPY : vaultMonthlyAPY,
 				vaultDeposited: vaultBalance,
 				vaultVersion: vault.version.startsWith('3') ? 3 : 2,
-				gaugeAPR: APRFor10xBoost,
+				gaugeAPY: APYFor10xBoost,
 				gaugeBoost: boost,
 				gaugeStaked: userPositionInGauge[gauge.address]?.deposit ?? zeroNormalizedBN,
 				actions: undefined
@@ -280,15 +280,15 @@ export function StakeUnstakeGauges(): ReactElement {
 							format: ({vaultDeposited}): string => formatAmount(vaultDeposited?.normalized || 0, 2, 6)
 						},
 						{
-							key: 'gaugeAPR',
-							label: 'Gauge APR',
+							key: 'gaugeAPY',
+							label: 'Gauge APY',
 							columnSpan: 2,
 							sortable: true,
 							className: 'whitespace-break text-right',
-							transform: ({gaugeAPR}): ReactElement => (
+							transform: ({gaugeAPY}): ReactElement => (
 								<div className={'font-number flex flex-col'}>
 									<p className={'font-bold'}>
-										{`${formatAmount(gaugeAPR / 10, 2, 2)}% → ${formatAmount(gaugeAPR, 2, 2)}%`}
+										{`${formatAmount(gaugeAPY / 10, 2, 2)}% → ${formatAmount(gaugeAPY, 2, 2)}%`}
 									</p>
 								</div>
 							)
@@ -357,7 +357,7 @@ export function StakeUnstakeGauges(): ReactElement {
 					isLoading={isLoadingGauges}
 					data={searchedGaugesData}
 					columns={13}
-					initialSortBy={'gaugeAPR'}
+					initialSortBy={'gaugeAPY'}
 				/>
 			</div>
 		</div>

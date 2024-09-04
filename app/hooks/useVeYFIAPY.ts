@@ -17,10 +17,10 @@ import {useYearnTokenPrice} from './useYearnTokenPrice';
 import type {TYDaemonVaults} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
-type TUseVeYFIAPR = {
+type TUseVeYFIAPY = {
 	dYFIPrice: number;
 };
-function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
+function useVeYFIAPY({dYFIPrice}: TUseVeYFIAPY): number {
 	const {vaults} = useYearn();
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const {data: veYFISupply} = useReadContract({
@@ -162,15 +162,15 @@ function useVeYFIAPR({dYFIPrice}: TUseVeYFIAPR): number {
 		isRunning.current = false;
 	}, [vaultsWithGauges]);
 
-	const APR = useMemo((): number => {
-		const apr =
+	const APY = useMemo((): number => {
+		const apy =
 			(rate * SECONDS_PER_YEAR * dYFIPrice) /
 			Number(toNormalizedBN(toBigInt(veYFISupply), 18).normalized) /
 			yfiPrice;
-		return apr;
+		return apy;
 	}, [rate, dYFIPrice, yfiPrice, veYFISupply]);
 
-	return APR;
+	return APY;
 }
 
-export {useVeYFIAPR};
+export {useVeYFIAPY};

@@ -6,7 +6,7 @@ import {TabManageGauges} from 'app/components/TabManageGauges';
 import {TabManageVeYFI} from 'app/components/TabManageVeYFI';
 import {useOption} from 'app/contexts/useOption';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
-import {useVeYFIAPR} from 'app/hooks/useVeYFIAPR';
+import {useVeYFIAPY} from 'app/hooks/useVeYFIAPY';
 import {formatDateShort} from 'app/utils';
 import {formatAmount, formatPercent, toBigInt, toNormalizedValue} from '@builtbymom/web3/utils';
 
@@ -15,7 +15,7 @@ import type {ReactElement} from 'react';
 function HeadingData(): ReactElement {
 	const {votingEscrow, positions} = useVotingEscrow();
 	const {dYFIPrice} = useOption();
-	const APR = useVeYFIAPR({dYFIPrice});
+	const APY = useVeYFIAPY({dYFIPrice});
 
 	const totalLockedYFI = toNormalizedValue(toBigInt(votingEscrow?.supply), 18);
 	const yourLockedYFI = toNormalizedValue(toBigInt(positions?.deposit?.underlyingBalance), 18);
@@ -23,8 +23,8 @@ function HeadingData(): ReactElement {
 		<SummaryData
 			items={[
 				{
-					label: 'Max veYFI lock vAPR',
-					content: APR ? formatPercent(APR * 100) : '-'
+					label: 'Max veYFI lock vAPY',
+					content: APY ? formatPercent(APY * 100) : '-'
 				},
 				{
 					label: 'Total Locked YFI',

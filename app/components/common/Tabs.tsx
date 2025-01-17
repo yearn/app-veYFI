@@ -18,7 +18,7 @@ type TTabsProps = {
 export function Tabs({items}: TTabsProps): ReactElement {
 	const router = useRouter();
 	// eslint-disable-next-line prefer-destructuring
-	const selectedTabId = router.pathname.split('/')[1];
+	const selectedTabId = router.pathname.split('/')[1] === '' ? 'gauges' : router.pathname.split('/')[1];
 
 	return (
 		<Fragment>

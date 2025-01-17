@@ -130,7 +130,6 @@ function useVeYFIAPY({dYFIPrice}: TUseVeYFIAPY): number {
 		 ******************************************************************************************/
 		let rate = 0;
 		let index = 0;
-		console.warn(vaultsWithGauges);
 		for (const vault of vaultsWithGauges) {
 			const gauge = toAddress(vault.staking.address);
 			const supply = toNormalizedBN(decodeAsBigInt(totalSupplyAndRewardRate[index++]), 18);

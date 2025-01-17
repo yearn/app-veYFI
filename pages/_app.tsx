@@ -8,7 +8,6 @@ import {GaugeContextApp} from 'app/contexts/useGauge';
 import {OptionContextApp} from 'app/contexts/useOption';
 import {VotingEscrowContextApp} from 'app/contexts/useVotingEscrow';
 import {YearnContextApp} from 'app/contexts/useYearn';
-import {arbitrum, base, fantom, optimism, polygon} from 'viem/chains';
 import {AnimatePresence, motion} from 'framer-motion';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
 import {cl} from '@builtbymom/web3/utils/cl';
@@ -87,7 +86,7 @@ function AppWrapper(props: AppProps & {supportedNetworks: Chain[]}): ReactElemen
  ** The returned JSX structure is a main element with the 'WithYearn' and 'App' components.
  **************************************************************************************************/
 function MyApp(props: AppProps): ReactElement {
-	const supportedNetworks = [mainnet, optimism, polygon, fantom, base, arbitrum];
+	const supportedNetworks = [mainnet];
 	return (
 		<>
 			<Head>

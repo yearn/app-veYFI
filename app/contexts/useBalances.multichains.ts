@@ -1,5 +1,6 @@
 import {useCallback, useMemo, useRef, useState} from 'react';
 import {erc20Abi} from 'viem';
+import {mainnet} from 'viem/chains';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
 import {AGGREGATE3_ABI} from '@builtbymom/web3/utils/abi/aggregate.abi';
@@ -186,6 +187,10 @@ async function getBalances(
 	const ownerAddress = address;
 	const calls: any[] = [];
 
+	if (chainID !== mainnet.id) {
+		return [{}, undefined];
+	}
+
 	for (const element of tokens) {
 		const {address: token} = element;
 
@@ -233,7 +238,7 @@ async function getBalances(
 		result = {...result, ...callResult};
 		return [result, undefined];
 	} catch (_error) {
-		console.error(_error);
+		console.error(_error, chainID);
 		return [result, _error as Error];
 	}
 }
@@ -247,7 +252,10 @@ export function useBalances(props?: TUseBalancesReq): TUseBalancesRes {
 	const [error, set_error] = useState<Error | undefined>(undefined);
 	const [balances, set_balances] = useState<TChainTokens>({});
 	const data = useRef<TDataRef>({nonce: 0, address: toAddress(), balances: {}});
-	const stringifiedTokens = useMemo((): string => serialize(props?.tokens || []), [props?.tokens]);
+	const stringifiedTokens = useMemo(
+		(): string => serialize(props?.tokens || [].filter((e: TUseBalancesTokens) => e.chainID === mainnet.id)),
+		[props?.tokens]
+	);
 
 	const updateBalancesCall = useCallback(
 		(currentUserAddress: TAddress, chainID: number, newRawData: TDict<TToken>): TChainTokens => {

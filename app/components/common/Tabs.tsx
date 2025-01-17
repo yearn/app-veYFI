@@ -1,61 +1,35 @@
-import {useEffect, useState} from 'react';
+import {Fragment} from 'react';
 import {useRouter} from 'next/router';
-import {AnimatePresence, motion} from 'framer-motion';
+import {motion} from 'framer-motion';
 import {Listbox, Transition} from '@headlessui/react';
 import {IconChevron} from '@yearn-finance/web-lib/icons/IconChevron';
 
 import type {ReactElement} from 'react';
 
-const variants = {
-	initial: {y: 10, opacity: 0},
-	enter: {y: 0, opacity: 1},
-	exit: {y: -10, opacity: 0}
-};
-
 type TItem = {
 	id: string;
 	label: string;
-	content: ReactElement;
 };
 
 type TTabsProps = {
 	items: TItem[];
-	className?: string;
 };
 
-export function Tabs({items, className}: TTabsProps): ReactElement {
-	const [selectedTabId, set_selectedTabId] = useState(items[0]?.id);
+export function Tabs({items}: TTabsProps): ReactElement {
 	const router = useRouter();
-
-	useEffect((): void => {
-		const tab = items.find((tab): boolean => tab.id === router.query.tab);
-		if (tab?.id) {
-			set_selectedTabId(tab?.id);
-		}
-	}, [items, router.query.tab]);
+	// eslint-disable-next-line prefer-destructuring
+	const selectedTabId = router.pathname.split('/')[1];
 
 	return (
-		<div className={`w-full bg-neutral-100 ${className}`}>
-			<nav className={'hidden h-14 w-full border-b-2 border-neutral-300 pl-[1px] pr-4 text-center md:flex'}>
+		<Fragment>
+			<nav className={'hidden h-14 w-full border-b-2 border-neutral-300 pl-px pr-4 text-center md:flex'}>
 				{items.map(
 					({id, label}): ReactElement => (
 						<div
 							key={`tab-label-${id}`}
 							className={`yearn--tab ${selectedTabId === id ? 'selected' : ''}`}
 							onClick={(): void => {
-								router.replace(
-									{
-										query: {
-											...router.query,
-											tab: id
-										}
-									},
-									undefined,
-									{
-										shallow: true
-									}
-								);
-								set_selectedTabId(id);
+								router.push(`/${id}`);
 							}}>
 							<p
 								title={label}
@@ -81,7 +55,9 @@ export function Tabs({items, className}: TTabsProps): ReactElement {
 			<div className={'relative z-50 px-4 pt-4 md:hidden'}>
 				<Listbox
 					value={selectedTabId}
-					onChange={(value): void => set_selectedTabId(value)}>
+					onChange={(value): void => {
+						router.push(`/${value}`);
+					}}>
 					{({open}): ReactElement => (
 						<>
 							<Listbox.Button
@@ -122,26 +98,6 @@ export function Tabs({items, className}: TTabsProps): ReactElement {
 					)}
 				</Listbox>
 			</div>
-			<AnimatePresence mode={'wait'}>
-				<motion.div
-					key={selectedTabId}
-					initial={'initial'}
-					animate={'enter'}
-					exit={'exit'}
-					variants={variants}
-					transition={{duration: 0.15}}>
-					{items.map(
-						({id, content}): ReactElement => (
-							<div
-								key={`tab-content-${id}`}
-								className={'w-full p-6'}
-								hidden={selectedTabId !== id}>
-								{content}
-							</div>
-						)
-					)}
-				</motion.div>
-			</AnimatePresence>
-		</div>
+		</Fragment>
 	);
 }

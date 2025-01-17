@@ -1,9 +1,9 @@
-import {TabManageGauges} from 'app/components/TabManageGauges';
+import {TabManageVeYFI} from 'app/components/TabManageVeYFI';
 
 import type {ReactElement} from 'react';
 
 function Index(): ReactElement {
-	return <TabManageGauges />;
+	return <TabManageVeYFI />;
 }
 
 export default Index;

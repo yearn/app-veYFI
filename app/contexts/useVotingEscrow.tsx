@@ -23,6 +23,7 @@ export type TVotingEscrow = {
 	decimals: number;
 	supply: bigint;
 	rewardPool: TAddress;
+	epoch: bigint;
 };
 
 export type TPosition = {
@@ -77,14 +78,15 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 			{...baseVeYFIContract, functionName: 'symbol'},
 			{...baseVeYFIContract, functionName: 'decimals'},
 			{...baseVeYFIContract, functionName: 'supply'},
-			{...baseVeYFIContract, functionName: 'reward_pool'}
+			{...baseVeYFIContract, functionName: 'reward_pool'},
+			{...baseVeYFIContract, functionName: 'epoch', args: [toAddress(address)]}
 		]
 	});
 	const votingEscrow = useMemo((): TVotingEscrow | undefined => {
 		if (!votingEscrowData || votingEscrowStatus !== 'success') {
 			return undefined;
 		}
-		const [token, name, symbol, decimals, supply, rewardPool] = votingEscrowData;
+		const [token, name, symbol, decimals, supply, rewardPool, epoch] = votingEscrowData;
 		return {
 			address: VEYFI_ADDRESS,
 			token: toAddress(decodeAsString(token)),
@@ -92,7 +94,8 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 			symbol: decodeAsString(symbol),
 			decimals: decodeAsNumber(decimals) || Number(decodeAsBigInt(decimals)),
 			supply: decodeAsBigInt(supply),
-			rewardPool: toAddress(decodeAsString(rewardPool))
+			rewardPool: toAddress(decodeAsString(rewardPool)),
+			epoch: decodeAsBigInt(epoch)
 		};
 	}, [votingEscrowData, votingEscrowStatus]);
 
@@ -131,7 +134,6 @@ export const VotingEscrowContextApp = memo(function VotingEscrowContextApp({
 			withdrawable: withdrawable
 		};
 	}, [positionData, positionStatus]);
-
 	/* 🔵 - Yearn Finance **********************************************************
 	 ** Retrieving the user's allowances of YFI for the veYFI contract.
 	 ******************************************************************************/

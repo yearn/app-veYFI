@@ -43,6 +43,16 @@ export function LockVeYFI(): ReactElement {
 		isLoading: isLoadingVotingEscrow,
 		refresh: refreshVotingEscrow
 	} = useVotingEscrow();
+
+	const hasExpiredLock = useMemo((): boolean => {
+		if (!positions?.unlockTime || !votingEscrow?.epoch) {
+			return false;
+		}
+		const isExpired = positions.unlockTime < Date.now();
+		const hasEpoch = votingEscrow.epoch > 0n;
+		return isExpired && hasEpoch;
+	}, [positions?.unlockTime, votingEscrow?.epoch]);
+
 	const tokenBalance = useBalance({address: toAddress(votingEscrow?.token), chainID: 1}); //veYFI is on ETH mainnet only
 	const hasLockedAmount = toBigInt(positions?.deposit?.underlyingBalance) > 0n;
 	const [approveLockStatus, set_approveLockStatus] = useState(defaultTxStatus);
@@ -137,7 +147,8 @@ export function LockVeYFI(): ReactElement {
 		minAmountAllowed: hasLockedAmount ? 0 : MIN_LOCK_TIME
 	});
 
-	const isApproveDisabled = !isActive || isApproved || isLoadingVotingEscrow || !votingEscrow || !address;
+	const isApproveDisabled =
+		!isActive || isApproved || isLoadingVotingEscrow || !votingEscrow || !address || hasExpiredLock;
 	const isLockDisabled =
 		!isActive ||
 		!isApproved ||
@@ -145,7 +156,9 @@ export function LockVeYFI(): ReactElement {
 		!isValidLockTime ||
 		isLoadingVotingEscrow ||
 		!votingEscrow ||
-		!address;
+		!address ||
+		hasExpiredLock;
+
 	const txAction = !isApproved
 		? {
 				label: 'Approve',
@@ -171,16 +184,23 @@ export function LockVeYFI(): ReactElement {
 		<div className={'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-16'}>
 			<div className={'col-span-1 w-full'}>
 				<h2 className={'m-0 text-2xl font-bold'}>{"YFI holders, time to Lock' ‘N Load"}</h2>
-				<div className={'mt-6 text-neutral-600'}>
-					<p>{'Lock your YFI to veYFI to:'}</p>
-					<ul>
-						<li className={'list-inside list-disc'}>{'Take part in Yearn governance.'}</li>
-						<li className={'list-inside list-disc'}>{'Direct YFI rewards to Vaults.'}</li>
-						<li className={'list-inside list-disc'}>
-							{'Receive dYFI (the longer you lock, the more you keep).'}
-						</li>
-					</ul>
-				</div>
+				{hasExpiredLock ? (
+					<div className={'bg-red-100 mt-6 rounded-lg text-red-900'}>
+						<p className={'font-bold'}>{'Warning: Unable to relock'}</p>
+						<p className={'mt-2'}>{'Accounts with expired locks cannot relock their YFI at this time. '}</p>
+					</div>
+				) : (
+					<div className={'mt-6 text-neutral-600'}>
+						<p>{'Lock your YFI to veYFI to:'}</p>
+						<ul>
+							<li className={'list-inside list-disc'}>{'Take part in Yearn governance.'}</li>
+							<li className={'list-inside list-disc'}>{'Direct YFI rewards to Vaults.'}</li>
+							<li className={'list-inside list-disc'}>
+								{'Receive dYFI (the longer you lock, the more you keep).'}
+							</li>
+						</ul>
+					</div>
+				)}
 			</div>
 
 			<div className={'col-span-1 grid w-full gap-6'}>

@@ -29,7 +29,8 @@ function useQueryArguments(): TQueryArgs {
 
 	useDeepCompareEffect((): void | VoidFunction => {
 		if (searchParams) {
-			handleQuery(searchParams);
+			const nativeSearchParams = new URLSearchParams(searchParams.toString());
+			handleQuery(nativeSearchParams);
 		}
 	}, [searchParams]);
 

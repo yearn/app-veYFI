@@ -64,6 +64,29 @@ function AppWrapper(props: AppProps & {supportedNetworks: Chain[]}): ReactElemen
 						<HeadingData />
 					</div>
 
+					<div className={' flex flex-col mb-6 bg-neutral-700 p-4 text-center text-neutral-100'}>
+						<span className={'text-lg font-bold'}>
+							{'veYFI has been deprecated and is being replaced by stYFI.'}
+						</span>
+						<span>
+							{
+								'Gauges no longer receive dYFI emissions, but existing rewards can still be claimed and redeemed.'
+							}
+						</span>
+						<span>
+							{'veYFI holders do not need to do anything at this time. '}
+							{'Read more'}
+							<a
+								className={'font-bold underline'}
+								href={
+									'https://snapshot.box/#/s:veyfi.eth/proposal/0x9b3a40326411eea6c51ec389a802ed695de53961fa49f6d3525e256513d0a7f9'
+								}
+								target={'_blank'}
+								rel={'noreferrer'}>
+								{' here.'}
+							</a>
+						</span>
+					</div>
 					<div className={`w-full bg-neutral-100`}>
 						<Tabs
 							items={tabs}

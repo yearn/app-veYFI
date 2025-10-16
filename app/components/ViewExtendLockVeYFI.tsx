@@ -3,7 +3,7 @@ import {extendVeYFILockTime} from 'app/actions';
 import {useOption} from 'app/contexts/useOption';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
 import {useYearn} from 'app/contexts/useYearn';
-import {getVotingPower, MAX_LOCK_TIME, MIN_LOCK_TIME, OVERLOCK_TIME, validateAmount, VEYFI_CHAIN_ID} from 'app/utils';
+import {getVotingPower, MAX_LOCK_TIME, OVERLOCK_TIME, VEYFI_CHAIN_ID} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {handleInputChangeValue, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
@@ -16,7 +16,8 @@ import type {TNormalizedBN} from '@builtbymom/web3/types';
 
 export function ExtendLockVeYFI(): ReactElement {
 	const [lockTime, set_lockTime] = useState<TNormalizedBN>(toNormalizedBN(0, 0));
-	const {provider, address, isActive} = useWeb3();
+	// const { provider, address, isActive } = useWeb3();
+	const {provider} = useWeb3();
 	const {onRefresh: refreshBalances} = useYearn();
 	const {votingEscrow, positions, refresh: refreshVotingEscrow} = useVotingEscrow();
 	const {isOverLockingAllowed} = useOption();
@@ -56,10 +57,10 @@ export function ExtendLockVeYFI(): ReactElement {
 		);
 	}, [positions?.deposit, newUnlockTime, willExtendLock]);
 
-	const {isValid: isValidLockTime, error: lockTimeError} = validateAmount({
-		amount: lockTime.normalized,
-		minAmountAllowed: MIN_LOCK_TIME
-	});
+	// const {isValid: isValidLockTime, error: lockTimeError} = validateAmount({
+	// 	amount: lockTime.normalized,
+	// 	minAmountAllowed: MIN_LOCK_TIME
+	// });
 
 	const maxWeeks = isOverLockingAllowed ? OVERLOCK_TIME : MAX_LOCK_TIME;
 	const maxTime =
@@ -94,7 +95,7 @@ export function ExtendLockVeYFI(): ReactElement {
 						maxAmount={toNormalizedBN(maxTime, 0)}
 						onMaxClick={(): void => set_lockTime(toNormalizedBN(Math.floor(toTime(maxTime)), 0))}
 						disabled={!hasLockedAmount}
-						error={lockTimeError}
+						// error={lockTimeError}
 						legend={'Minimum: 1 week'}
 					/>
 				</div>
@@ -108,9 +109,10 @@ export function ExtendLockVeYFI(): ReactElement {
 						className={'w-full md:mt-7'}
 						onClick={onExtendLockTime}
 						isBusy={extendLockTimeStatus.pending}
-						isDisabled={
-							!isActive || !isValidLockTime || extendLockTimeStatus.pending || !votingEscrow || !address
-						}>
+						// isDisabled={
+						// 	!isActive || !isValidLockTime || extendLockTimeStatus.pending || !votingEscrow || !address
+						// }>
+						isDisabled={true}>
 						{'Extend'}
 					</Button>
 				</div>

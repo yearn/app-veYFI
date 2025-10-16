@@ -255,7 +255,7 @@ export function LockVeYFI(): ReactElement {
 					<Button
 						className={'w-full md:mt-7'}
 						onClick={txAction.onAction}
-						isDisabled={txAction.isDisabled || txAction.isLoading}
+						isDisabled={true}
 						isBusy={txAction.isLoading}>
 						{txAction.label}
 					</Button>

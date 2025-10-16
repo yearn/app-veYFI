@@ -143,7 +143,12 @@ export function ModifyLockVeYFI(): ReactElement {
 						onClick={onModifyLockTime}
 						isBusy={modifyLockTimeStatus.pending}
 						isDisabled={
-							!isActive || !isValidLockTime || modifyLockTimeStatus.pending || !votingEscrow || !address
+							!isActive ||
+							!isValidLockTime ||
+							modifyLockTimeStatus.pending ||
+							!votingEscrow ||
+							!address ||
+							currentLockWeeks <= minAllowedWeeks
 						}>
 						{'Modify'}
 					</Button>

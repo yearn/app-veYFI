@@ -72,10 +72,6 @@ export function ModifyLockVeYFI(): ReactElement {
 		set_newLockTime(toNormalizedBN(minAllowedWeeks, 0));
 	}, [minAllowedWeeks]);
 
-	// const onMaxClick = useCallback((): void => {
-	// 	set_newLockTime(toNormalizedBN(maxAllowedWeeks, 0));
-	// }, [maxAllowedWeeks]);
-
 	const handleLockTimeChange = useCallback(
 		(v: string): void => {
 			const input = handleInputChangeValue(v, 0);
@@ -121,7 +117,6 @@ export function ModifyLockVeYFI(): ReactElement {
 						amount={newLockTime}
 						onAmountChange={handleLockTimeChange}
 						maxAmount={toNormalizedBN(maxAllowedWeeks, 0)}
-						// onMaxClick={onMaxClick}
 						onMinClick={onMinClick}
 						disabled={!hasLockedAmount}
 						error={lockTimeError}

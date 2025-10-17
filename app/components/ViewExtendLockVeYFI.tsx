@@ -16,7 +16,6 @@ import type {TNormalizedBN} from '@builtbymom/web3/types';
 
 export function ExtendLockVeYFI(): ReactElement {
 	const [lockTime, set_lockTime] = useState<TNormalizedBN>(toNormalizedBN(0, 0));
-	// const { provider, address, isActive } = useWeb3();
 	const {provider} = useWeb3();
 	const {onRefresh: refreshBalances} = useYearn();
 	const {votingEscrow, positions, refresh: refreshVotingEscrow} = useVotingEscrow();
@@ -57,11 +56,6 @@ export function ExtendLockVeYFI(): ReactElement {
 		);
 	}, [positions?.deposit, newUnlockTime, willExtendLock]);
 
-	// const {isValid: isValidLockTime, error: lockTimeError} = validateAmount({
-	// 	amount: lockTime.normalized,
-	// 	minAmountAllowed: MIN_LOCK_TIME
-	// });
-
 	const maxWeeks = isOverLockingAllowed ? OVERLOCK_TIME : MAX_LOCK_TIME;
 	const maxTime =
 		maxWeeks - Number(weeksToUnlock?.normalized || 0) > 0 ? maxWeeks - Number(weeksToUnlock?.normalized || 0) : 0;
@@ -95,7 +89,6 @@ export function ExtendLockVeYFI(): ReactElement {
 						maxAmount={toNormalizedBN(maxTime, 0)}
 						onMaxClick={(): void => set_lockTime(toNormalizedBN(Math.floor(toTime(maxTime)), 0))}
 						disabled={!hasLockedAmount}
-						// error={lockTimeError}
 						legend={'Minimum: 1 week'}
 					/>
 				</div>
@@ -109,9 +102,6 @@ export function ExtendLockVeYFI(): ReactElement {
 						className={'w-full md:mt-7'}
 						onClick={onExtendLockTime}
 						isBusy={extendLockTimeStatus.pending}
-						// isDisabled={
-						// 	!isActive || !isValidLockTime || extendLockTimeStatus.pending || !votingEscrow || !address
-						// }>
 						isDisabled={true}>
 						{'Extend'}
 					</Button>

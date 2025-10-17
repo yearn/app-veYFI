@@ -198,14 +198,7 @@ export function LockVeYFI(): ReactElement {
 					</div>
 				) : (
 					<div className={'mt-6 text-neutral-600'}>
-						<p>{'Lock your YFI to veYFI to:'}</p>
-						<ul>
-							<li className={'list-inside list-disc'}>{'Take part in Yearn governance.'}</li>
-							<li className={'list-inside list-disc'}>{'Direct YFI rewards to Vaults.'}</li>
-							<li className={'list-inside list-disc'}>
-								{'Receive dYFI (the longer you lock, the more you keep).'}
-							</li>
-						</ul>
+						<p>{'This interaction is disabled due to veYFI being deprecated.'}</p>
 					</div>
 				)}
 			</div>

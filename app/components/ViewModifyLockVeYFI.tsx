@@ -72,9 +72,9 @@ export function ModifyLockVeYFI(): ReactElement {
 		set_newLockTime(toNormalizedBN(minAllowedWeeks, 0));
 	}, [minAllowedWeeks]);
 
-	const onMaxClick = useCallback((): void => {
-		set_newLockTime(toNormalizedBN(maxAllowedWeeks, 0));
-	}, [maxAllowedWeeks]);
+	// const onMaxClick = useCallback((): void => {
+	// 	set_newLockTime(toNormalizedBN(maxAllowedWeeks, 0));
+	// }, [maxAllowedWeeks]);
 
 	const handleLockTimeChange = useCallback(
 		(v: string): void => {
@@ -105,11 +105,7 @@ export function ModifyLockVeYFI(): ReactElement {
 			<div className={'col-span-1 w-full'}>
 				<h2 className={'m-0 text-2xl font-bold'}>{'Modify lock'}</h2>
 				<div className={'mt-6 text-neutral-600'}>
-					<p>
-						{
-							'Set your lock duration directly. You can increase your lock period or maintain your maximum lock.'
-						}
-					</p>
+					<p>{'Reduce your lock duration to 209 weeks (4 years) here.'}</p>
 				</div>
 			</div>
 
@@ -125,11 +121,11 @@ export function ModifyLockVeYFI(): ReactElement {
 						amount={newLockTime}
 						onAmountChange={handleLockTimeChange}
 						maxAmount={toNormalizedBN(maxAllowedWeeks, 0)}
-						onMaxClick={onMaxClick}
+						// onMaxClick={onMaxClick}
 						onMinClick={onMinClick}
 						disabled={!hasLockedAmount}
 						error={lockTimeError}
-						legend={`Min: ${minAllowedWeeks} weeks, Max: ${maxAllowedWeeks} weeks`}
+						legend={`Min: ${minAllowedWeeks} weeks`}
 					/>
 				</div>
 				<div className={'grid grid-cols-1 gap-6 md:grid-cols-2 md:pb-5'}>

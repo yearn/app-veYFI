@@ -44,7 +44,7 @@ export function ClaimVeYFI(): ReactElement {
 				<div className={'md:min-h-[104px]'}>
 					<h2 className={'m-0 text-2xl font-bold'}>{'Claim expired lock'}</h2>
 					<div className={'mt-6 text-neutral-600'}>
-						<p>{'Claim your YFI from expired veYFI lock.'}</p>
+						<p>{'Claim your YFI from an expired veYFI lock.'}</p>
 					</div>
 				</div>
 			</div>

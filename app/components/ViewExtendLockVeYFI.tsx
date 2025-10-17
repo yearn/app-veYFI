@@ -70,7 +70,7 @@ export function ExtendLockVeYFI(): ReactElement {
 			<div className={'col-span-1 w-full'}>
 				<h2 className={'m-0 text-2xl font-bold'}>{'Extend lock'}</h2>
 				<div className={'mt-6 text-neutral-600'}>
-					<p>{'Want to lock for longer? Extend your lock period to increase your gauge boost weight.'}</p>
+					<p>{'This interaction is disabled due to veYFI being deprecated.'}</p>
 				</div>
 			</div>
 

@@ -41,7 +41,7 @@ export function EarlyExitVeYFI(): ReactElement {
 			<div className={'col-span-1 w-full'}>
 				<h2 className={'m-0 text-2xl font-bold'}>{'Early exit'}</h2>
 				<div className={'mt-6 text-neutral-600'}>
-					<p>{'Or you can exit early by paying a penalty based on lock duration.'}</p>
+					<p>{'you can exit early by paying a penalty based on lock duration.'}</p>
 				</div>
 			</div>
 

@@ -88,7 +88,7 @@ export function ExtendLockVeYFI(): ReactElement {
 						}}
 						maxAmount={toNormalizedBN(maxTime, 0)}
 						onMaxClick={(): void => set_lockTime(toNormalizedBN(Math.floor(toTime(maxTime)), 0))}
-						disabled={!hasLockedAmount}
+						disabled={true}
 						legend={'Minimum: 1 week'}
 					/>
 				</div>

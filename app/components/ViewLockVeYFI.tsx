@@ -214,6 +214,7 @@ export function LockVeYFI(): ReactElement {
 						onMaxClick={(): void => set_lockAmount(tokenBalance)}
 						legend={`Available: ${formatAmount(tokenBalance.normalized, 4)} YFI`}
 						error={lockAmountError}
+						disabled={true}
 					/>
 					<AmountInput
 						label={'Current lock period (weeks)'}

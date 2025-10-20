@@ -5,7 +5,6 @@ import AppHeader from 'app/components/common/Header';
 import Meta from 'app/components/common/Meta';
 import {Tabs} from 'app/components/common/Tabs';
 import {HeadingData} from 'app/components/HeadingData';
-import {OverlockSettings} from 'app/components/OverlockSettings';
 import {GaugeContextApp} from 'app/contexts/useGauge';
 import {OptionContextApp} from 'app/contexts/useOption';
 import {VotingEscrowContextApp} from 'app/contexts/useVotingEscrow';
@@ -88,10 +87,7 @@ function AppWrapper(props: AppProps & {supportedNetworks: Chain[]}): ReactElemen
 						</span>
 					</div>
 					<div className={`w-full bg-neutral-100`}>
-						<Tabs
-							items={tabs}
-							rightSlot={<OverlockSettings />}
-						/>
+						<Tabs items={tabs} />
 						<div className={'w-full p-6'}>
 							<Component
 								router={props.router}

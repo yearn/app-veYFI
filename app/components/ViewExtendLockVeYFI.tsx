@@ -18,7 +18,7 @@ export function ExtendLockVeYFI(): ReactElement {
 	const {provider} = useWeb3();
 	const {onRefresh: refreshBalances} = useYearn();
 	const {votingEscrow, positions, refresh: refreshVotingEscrow} = useVotingEscrow();
-	const hasLockedAmount = toBigInt(positions?.deposit?.underlyingBalance) > 0n;
+	// const hasLockedAmount = toBigInt(positions?.deposit?.underlyingBalance) > 0n;
 	const willExtendLock = toBigInt(lockTime.raw) > 0n;
 	const timeUntilUnlock = positions?.unlockTime ? getTimeUntil(positions?.unlockTime) : undefined;
 	const weeksToUnlock = toNormalizedBN(toWeeks(timeUntilUnlock), 0);

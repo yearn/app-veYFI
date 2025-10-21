@@ -63,7 +63,7 @@ function AppWrapper(props: AppProps & {supportedNetworks: Chain[]}): ReactElemen
 						<HeadingData />
 					</div>
 
-					<div className={' flex flex-col mb-6 bg-neutral-700 p-4 text-center text-neutral-100'}>
+					<div className={' mb-6 flex flex-col bg-neutral-700 p-4 text-center text-neutral-100'}>
 						<span className={'text-lg font-bold'}>
 							{'veYFI has been deprecated and is being replaced by stYFI.'}
 						</span>

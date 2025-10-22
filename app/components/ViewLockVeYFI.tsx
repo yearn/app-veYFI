@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {increaseVeYFILockAmount, lockVeYFI} from 'app/actions';
-import {useOption} from 'app/contexts/useOption';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
 import {useYearn} from 'app/contexts/useYearn';
 import {useBalance} from 'app/hooks/useBalance';
@@ -9,7 +8,6 @@ import {
 	MAX_LOCK_TIME,
 	MIN_LOCK_AMOUNT,
 	MIN_LOCK_TIME,
-	OVERLOCK_TIME,
 	validateAllowance,
 	validateAmount,
 	VEYFI_CHAIN_ID
@@ -36,7 +34,6 @@ import type {TNormalizedBN} from '@builtbymom/web3/types';
 export function LockVeYFI(): ReactElement {
 	const [lockAmount, set_lockAmount] = useState(zeroNormalizedBN);
 	const [lockTime, set_lockTime] = useState('');
-	const {isOverLockingAllowed} = useOption();
 	const {provider, address, isActive} = useWeb3();
 	const {onRefresh: refreshBalances} = useYearn();
 	const {
@@ -184,7 +181,7 @@ export function LockVeYFI(): ReactElement {
 				};
 
 	return (
-		<div className={'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-16'}>
+		<div className={'grid grid-cols-1 gap-6 opacity-40 md:grid-cols-2 md:gap-16'}>
 			<div className={'col-span-1 w-full'}>
 				<h2 className={'m-0 text-2xl font-bold'}>{'Lock YFI for veYFI'}</h2>
 				{hasExpiredLock ? (
@@ -198,14 +195,7 @@ export function LockVeYFI(): ReactElement {
 					</div>
 				) : (
 					<div className={'mt-6 text-neutral-600'}>
-						<p>{'Lock your YFI to veYFI to:'}</p>
-						<ul>
-							<li className={'list-inside list-disc'}>{'Take part in Yearn governance.'}</li>
-							<li className={'list-inside list-disc'}>{'Direct YFI rewards to Vaults.'}</li>
-							<li className={'list-inside list-disc'}>
-								{'Receive dYFI (the longer you lock, the more you keep).'}
-							</li>
-						</ul>
+						<p>{'This interaction is disabled due to veYFI being deprecated.'}</p>
 					</div>
 				)}
 			</div>
@@ -221,6 +211,7 @@ export function LockVeYFI(): ReactElement {
 						onMaxClick={(): void => set_lockAmount(tokenBalance)}
 						legend={`Available: ${formatAmount(tokenBalance.normalized, 4)} YFI`}
 						error={lockAmountError}
+						disabled={true}
 					/>
 					<AmountInput
 						label={'Current lock period (weeks)'}
@@ -230,18 +221,16 @@ export function LockVeYFI(): ReactElement {
 						)}
 						onAmountChange={(v: string): void => {
 							const inputed = handleInputChangeValue(v, 0);
-							const maxWeeks = isOverLockingAllowed ? OVERLOCK_TIME : MAX_LOCK_TIME;
+							const maxWeeks = MAX_LOCK_TIME;
 							if (Number(inputed.normalized) > maxWeeks + 1) {
 								set_lockTime((maxWeeks + 1).toString());
 							} else {
 								set_lockTime(inputed.normalized.toString());
 							}
 						}}
-						maxAmount={toNormalizedBN((isOverLockingAllowed ? OVERLOCK_TIME : MAX_LOCK_TIME) + 1, 0)}
-						onMaxClick={(): void =>
-							set_lockTime(((isOverLockingAllowed ? OVERLOCK_TIME : MAX_LOCK_TIME) + 1).toString())
-						}
-						disabled={hasLockedAmount}
+						maxAmount={toNormalizedBN(MAX_LOCK_TIME + 1, 0)}
+						onMaxClick={(): void => set_lockTime((MAX_LOCK_TIME + 1).toString())}
+						disabled={true}
 						legend={'Minimum: 1 week'}
 						error={lockTimeError}
 					/>
@@ -255,7 +244,7 @@ export function LockVeYFI(): ReactElement {
 					<Button
 						className={'w-full md:mt-7'}
 						onClick={txAction.onAction}
-						isDisabled={txAction.isDisabled || txAction.isLoading}
+						isDisabled={true}
 						isBusy={txAction.isLoading}>
 						{txAction.label}
 					</Button>

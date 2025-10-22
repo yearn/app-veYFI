@@ -1,10 +1,9 @@
 import {useCallback, useMemo, useState} from 'react';
 import {extendVeYFILockTime} from 'app/actions';
 import {AmountInputWithMin} from 'app/components/common/AmountInputWithMin';
-import {useOption} from 'app/contexts/useOption';
 import {useVotingEscrow} from 'app/contexts/useVotingEscrow';
 import {useYearn} from 'app/contexts/useYearn';
-import {getVotingPower, MAX_LOCK_TIME, OVERLOCK_TIME, validateAmount, VEYFI_CHAIN_ID} from 'app/utils';
+import {getVotingPower, MAX_LOCK_TIME, VEYFI_CHAIN_ID} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {handleInputChangeValue, toBigInt, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
@@ -17,16 +16,14 @@ import type {TNormalizedBN} from '@builtbymom/web3/types';
 
 export function ModifyLockVeYFI(): ReactElement {
 	const [newLockTime, set_newLockTime] = useState<TNormalizedBN>(toNormalizedBN(0, 0));
-	const {provider, address, isActive} = useWeb3();
+	const {provider} = useWeb3();
 	const {onRefresh: refreshBalances} = useYearn();
 	const {votingEscrow, positions, refresh: refreshVotingEscrow} = useVotingEscrow();
-	const {isOverLockingAllowed} = useOption();
-	const hasLockedAmount = toBigInt(positions?.deposit?.underlyingBalance) > 0n;
 	const willModifyLock = toBigInt(newLockTime.raw) > 0n;
 	const timeUntilUnlock = positions?.unlockTime ? getTimeUntil(positions?.unlockTime) : undefined;
 	const weeksToUnlock = toNormalizedBN(toWeeks(timeUntilUnlock), 0);
 	const currentLockWeeks = Number(weeksToUnlock?.normalized || 0);
-	const targetUnlockTime = Date.now() + fromWeeks(toTime(newLockTime.normalized));
+	const targetUnlockTime = Date.now() + fromWeeks(toTime(209));
 	const [modifyLockTimeStatus, set_modifyLockTimeStatus] = useState(defaultTxStatus);
 
 	const onTxSuccess = useCallback(async (): Promise<void> => {
@@ -60,21 +57,11 @@ export function ModifyLockVeYFI(): ReactElement {
 
 	// Determine minimum and maximum allowed lock times based on current lock duration
 	const minAllowedWeeks = currentLockWeeks < MAX_LOCK_TIME ? currentLockWeeks + 1 : MAX_LOCK_TIME;
-	const maxAllowedWeeks = isOverLockingAllowed ? OVERLOCK_TIME : MAX_LOCK_TIME;
-
-	const {isValid: isValidLockTime, error: lockTimeError} = validateAmount({
-		amount: newLockTime.normalized,
-		minAmountAllowed: minAllowedWeeks,
-		maxAmountAllowed: maxAllowedWeeks
-	});
+	const maxAllowedWeeks = MAX_LOCK_TIME;
 
 	const onMinClick = useCallback((): void => {
 		set_newLockTime(toNormalizedBN(minAllowedWeeks, 0));
 	}, [minAllowedWeeks]);
-
-	const onMaxClick = useCallback((): void => {
-		set_newLockTime(toNormalizedBN(maxAllowedWeeks, 0));
-	}, [maxAllowedWeeks]);
 
 	const handleLockTimeChange = useCallback(
 		(v: string): void => {
@@ -105,11 +92,7 @@ export function ModifyLockVeYFI(): ReactElement {
 			<div className={'col-span-1 w-full'}>
 				<h2 className={'m-0 text-2xl font-bold'}>{'Modify lock'}</h2>
 				<div className={'mt-6 text-neutral-600'}>
-					<p>
-						{
-							'Set your lock duration directly. You can increase your lock period or maintain your maximum lock.'
-						}
-					</p>
+					<p>{'Reduce your lock duration to 209 weeks (4 years) here.'}</p>
 				</div>
 			</div>
 
@@ -122,14 +105,12 @@ export function ModifyLockVeYFI(): ReactElement {
 					/>
 					<AmountInputWithMin
 						label={'New lock period (weeks)'}
-						amount={newLockTime}
+						amount={toNormalizedBN(maxAllowedWeeks, 0)}
 						onAmountChange={handleLockTimeChange}
 						maxAmount={toNormalizedBN(maxAllowedWeeks, 0)}
-						onMaxClick={onMaxClick}
 						onMinClick={onMinClick}
-						disabled={!hasLockedAmount}
-						error={lockTimeError}
-						legend={`Min: ${minAllowedWeeks} weeks, Max: ${maxAllowedWeeks} weeks`}
+						disabled
+						legend={`Min: ${minAllowedWeeks} weeks`}
 					/>
 				</div>
 				<div className={'grid grid-cols-1 gap-6 md:grid-cols-2 md:pb-5'}>
@@ -142,9 +123,7 @@ export function ModifyLockVeYFI(): ReactElement {
 						className={'w-full md:mt-7'}
 						onClick={onModifyLockTime}
 						isBusy={modifyLockTimeStatus.pending}
-						isDisabled={
-							!isActive || !isValidLockTime || modifyLockTimeStatus.pending || !votingEscrow || !address
-						}>
+						isDisabled={currentLockWeeks < maxAllowedWeeks}>
 						{'Modify'}
 					</Button>
 				</div>

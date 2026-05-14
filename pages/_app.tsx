@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import localFont from 'next/font/local';
 import Head from 'next/head';
 import AppHeader from 'app/components/common/Header';
@@ -9,6 +9,8 @@ import {GaugeContextApp} from 'app/contexts/useGauge';
 import {OptionContextApp} from 'app/contexts/useOption';
 import {VotingEscrowContextApp} from 'app/contexts/useVotingEscrow';
 import {YearnContextApp} from 'app/contexts/useYearn';
+import {useDisconnect} from 'wagmi';
+import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
 import {cl} from '@builtbymom/web3/utils/cl';
 import {mainnet} from '@wagmi/chains';
@@ -40,6 +42,34 @@ const aeonik = localFont({
 		}
 	]
 });
+
+function WalletConnectionGuard(): ReactElement | null {
+	const {address, isActive, provider} = useWeb3();
+	const {disconnect} = useDisconnect();
+
+	useEffect(() => {
+		if (!address || isActive) {
+			return;
+		}
+		const connectorId =
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			((provider as any)?.id || (provider as any)?._wallets?.[0]?.id || '') as string;
+		const shouldReset = typeof connectorId === 'string' && connectorId.toLowerCase().includes('walletconnect');
+		const hasLostProvider = !provider;
+		if (!shouldReset && !hasLostProvider) {
+			return;
+		}
+		const timer = window.setTimeout(() => {
+			if (!isActive && address) {
+				console.warn('[wallet] Resetting stalled connection to recover from subscription failure');
+				disconnect();
+			}
+		}, 1500);
+		return (): void => window.clearTimeout(timer);
+	}, [address, disconnect, isActive, provider]);
+
+	return null;
+}
 
 function AppWrapper(props: AppProps & {supportedNetworks: Chain[]}): ReactElement {
 	const {Component, pageProps} = props;
@@ -143,6 +173,7 @@ function MyApp(props: AppProps): ReactElement {
 											supportedNetworks={supportedNetworks}
 											{...props}
 										/>
+										<WalletConnectionGuard />
 									</main>
 								</main>
 							</OptionContextApp>

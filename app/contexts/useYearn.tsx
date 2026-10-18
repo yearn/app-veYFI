@@ -7,8 +7,8 @@ import {isZeroAddress, toAddress, toNormalizedBN, zeroNormalizedBN} from '@built
 import {useLocalStorageValue} from '@react-hookz/web';
 import {useYearnBalances} from './useYearn.helper';
 
-import type {ReactElement} from 'react';
 import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
+import type {ReactElement} from 'react';
 import type {TYChainTokens, TYToken} from '@yearn-finance/web-lib/types';
 import type {TUseBalancesTokens} from '@builtbymom/web3/hooks/useBalances.multichains';
 import type {TAddress, TDict, TNormalizedBN} from '@builtbymom/web3/types';

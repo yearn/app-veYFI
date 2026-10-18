@@ -12,8 +12,8 @@ import {readContracts} from '@wagmi/core';
 
 import {useYearn} from './useYearn';
 
-import type {ReactElement} from 'react';
 import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
+import type {ReactElement} from 'react';
 import type {TAddress, TDict, TNormalizedBN} from '@builtbymom/web3/types';
 
 export type TGauge = {

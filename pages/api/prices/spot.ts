@@ -6,8 +6,8 @@ const MAX_PRICE_AGE_SECONDS = 15 * 60;
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 
 const PRICE_KEYS = [
-	{key: `ethereum:${YFI_ADDRESS}`, aliases: [YFI_ADDRESS]},
-	{key: `ethereum:${WETH_ADDRESS}`, aliases: [WETH_ADDRESS, ETH_TOKEN_ADDRESS]}
+	{key: `ethereum:${YFI_ADDRESS.toLowerCase()}`, aliases: [YFI_ADDRESS]},
+	{key: `ethereum:${WETH_ADDRESS.toLowerCase()}`, aliases: [WETH_ADDRESS, ETH_TOKEN_ADDRESS]}
 ];
 
 type TPriceEntry = {
@@ -30,10 +30,13 @@ type TSpotResponse = {
 };
 
 function freshPrice(coin: TPriceServiceCoin | undefined, nowSeconds: number): number | undefined {
+	if (coin?.error) {
+		return undefined;
+	}
 	const entry = coin?.prices?.[0];
 	const price = entry?.price;
 	const timestamp = entry?.timestamp;
-	if (typeof price !== 'number' || !Number.isFinite(price) || price <= 0) {
+	if (typeof price !== 'number' || !Number.isFinite(price) || price < 0) {
 		return undefined;
 	}
 	if (typeof timestamp !== 'number' || !Number.isFinite(timestamp)) {
@@ -80,11 +83,14 @@ export default async function handler(
 			res.status(502).json({error: 'Price Service response was invalid'});
 			return;
 		}
+		const coinsByLowercaseKey = new Map(
+			Object.entries(body.coins).map(([key, coin]) => [key.toLowerCase(), coin])
+		);
 
 		const nowSeconds = Date.now() / 1000;
 		const prices: Record<number, Record<string, number>> = {1: {}};
 		for (const {key, aliases} of PRICE_KEYS) {
-			const price = freshPrice(body.coins[key], nowSeconds);
+			const price = freshPrice(coinsByLowercaseKey.get(key.toLowerCase()), nowSeconds);
 			if (price === undefined) {
 				continue;
 			}

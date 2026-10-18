@@ -5,6 +5,7 @@ import {deserialize, serialize} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {isZeroAddress, toAddress, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {useLocalStorageValue} from '@react-hookz/web';
+
 import {useYearnBalances} from './useYearn.helper';
 
 import type {TYearnVault} from 'app/hooks/useKongYearnVaults';

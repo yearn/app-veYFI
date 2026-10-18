@@ -6,6 +6,7 @@ import type {TAddress} from '@builtbymom/web3/types';
 
 const KONG_VAULT_LIST_URL = 'https://kong.yearn.fi/api/rest/list/vaults/1?origin=yearn';
 const KONG_SNAPSHOT_URL = 'https://kong.yearn.fi/api/rest/snapshot/1';
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 type TRecord = Record<string, unknown>;
 
@@ -61,6 +62,10 @@ type TKongYieldData = {
 		apy?: number;
 		// Kong APY values are ratios; the gauge table converts netAPY for display.
 		netAPY?: number;
+	};
+	estimated?: {
+		// Kong estimated APY values are ratios, like the oracle values.
+		apy?: number;
 	};
 	historical?: {
 		net?: number;
@@ -154,6 +159,7 @@ function feeData(value: unknown): TKongFeeData {
 function yieldData(value: unknown): TKongYieldData {
 	const performance = asRecord(value);
 	const oracle = asRecord(performance?.oracle);
+	const estimated = asRecord(performance?.estimated);
 	const historical = asRecord(performance?.historical);
 	return {
 		oracle: {
@@ -162,6 +168,7 @@ function yieldData(value: unknown): TKongYieldData {
 			apy: asNumber(oracle?.apy),
 			netAPY: asNumber(oracle?.netAPY)
 		},
+		estimated: {apy: asNumber(estimated?.apy)},
 		historical: {
 			net: asNumber(historical?.net),
 			weeklyNet: asNumber(historical?.weeklyNet),
@@ -267,23 +274,32 @@ async function fetchVaultList(): Promise<TKongVaultListRecord[]> {
 }
 
 async function fetchSnapshots(addresses: string[]): Promise<Record<string, TKongSnapshot>> {
-	const results = await Promise.allSettled(
-		addresses.map(async (address): Promise<[string, TKongSnapshot]> => {
-			const snapshot = await fetchJSON<unknown>(`${KONG_SNAPSHOT_URL}/${address}`);
-			const record = asRecord(snapshot);
-			if (!record) {
-				throw new Error('Kong snapshot response must be an object');
-			}
-			return [address.toLowerCase(), record as TKongSnapshot];
-		})
-	);
 	const snapshots: Record<string, TKongSnapshot> = {};
-	for (const result of results) {
-		if (result.status === 'fulfilled') {
-			const [address, snapshot] = result.value;
-			snapshots[address] = snapshot;
-		} else {
-			console.warn('Kong snapshot unavailable for a veYFI vault', result.reason);
+	for (let offset = 0; offset < addresses.length; offset += 8) {
+		const batch = addresses.slice(offset, offset + 8);
+		const results = await Promise.allSettled(
+			batch.map(async (address): Promise<[string, TKongSnapshot]> => {
+				const snapshot = await fetchJSON<unknown>(`${KONG_SNAPSHOT_URL}/${address}`);
+				const record = asRecord(snapshot);
+				if (!record) {
+					throw new Error('Kong snapshot response must be an object');
+				}
+				const meta = asRecord(record.meta);
+				const snapshotAddress = asAddress(record.address) ?? asAddress(meta?.address);
+				const snapshotChainID = asNumber(record.chainId ?? record.chainID ?? meta?.chainId ?? meta?.chainID);
+				if (snapshotAddress?.toLowerCase() !== address.toLowerCase() || snapshotChainID !== 1) {
+					throw new Error(`Kong snapshot identity mismatch for ${address}`);
+				}
+				return [address.toLowerCase(), record as TKongSnapshot];
+			})
+		);
+		for (const result of results) {
+			if (result.status === 'fulfilled') {
+				const [address, snapshot] = result.value;
+				snapshots[address] = snapshot;
+			} else {
+				console.warn('Kong snapshot unavailable for a veYFI vault', result.reason);
+			}
 		}
 	}
 	return snapshots;
@@ -293,6 +309,7 @@ export function useKongYearnVaults(): {
 	vaults: Record<string, TYearnVault>;
 	vaultsMigrations: Record<string, TYearnVault>;
 	vaultsRetired: Record<string, TYearnVault>;
+	vaultsAll: Record<string, TYearnVault>;
 	isLoading: boolean;
 	mutate: () => Promise<unknown>;
 } {
@@ -305,12 +322,12 @@ export function useKongYearnVaults(): {
 		return (records ?? [])
 			.filter((record) => {
 				const staking = asRecord(record.staking);
+				const stakingAddress = asAddress(staking?.address);
 				return (
 					record.origin === 'yearn' &&
 					Number(record.chainId ?? record.chainID) === 1 &&
-					record.isHidden !== true &&
-					record.isRetired !== true &&
-					staking?.available === true
+					(staking?.available === true ||
+						Boolean(stakingAddress && stakingAddress.toLowerCase() !== ZERO_ADDRESS))
 				);
 			})
 			.map((record) => asAddress(record.address)?.toLowerCase())
@@ -345,7 +362,8 @@ export function useKongYearnVaults(): {
 				vaults[key] = vault;
 			}
 		}
-		return {vaults, vaultsMigrations, vaultsRetired};
+		const vaultsAll = {...vaultsRetired, ...vaultsMigrations, ...vaults};
+		return {vaults, vaultsMigrations, vaultsRetired, vaultsAll};
 	}, [records, snapshots]);
 
 	return {...data, isLoading, mutate: async () => mutate()};

@@ -36,6 +36,7 @@ export type TYearnContext = {
 	vaults: TDict<TYearnVault>;
 	vaultsMigrations: TDict<TYearnVault>;
 	vaultsRetired: TDict<TYearnVault>;
+	vaultsAll: TDict<TYearnVault>;
 	isLoadingVaultList: boolean;
 	zapSlippage: number;
 	maxLoss: bigint;
@@ -73,6 +74,7 @@ const YearnContext = createContext<TYearnContext>({
 	vaults: {},
 	vaultsMigrations: {},
 	vaultsRetired: {},
+	vaultsAll: {},
 	isLoadingVaultList: false,
 	maxLoss: DEFAULT_MAX_LOSS,
 	zapSlippage: 0.1,
@@ -113,7 +115,7 @@ export const YearnContextApp = memo(function YearnContextApp({children}: {childr
 	);
 
 	const prices = usePriceServiceSpot();
-	const {vaults, vaultsMigrations, vaultsRetired, isLoading} = useKongYearnVaults();
+	const {vaults, vaultsMigrations, vaultsRetired, vaultsAll, isLoading} = useKongYearnVaults();
 	const {balances, isLoadingBalances, onRefresh} = useYearnBalances({
 		vaults,
 		vaultsMigrations,
@@ -165,6 +167,7 @@ export const YearnContextApp = memo(function YearnContextApp({children}: {childr
 				vaults,
 				vaultsMigrations,
 				vaultsRetired,
+				vaultsAll,
 				isLoadingVaultList: isLoading,
 				getToken,
 				getBalance,

@@ -4,7 +4,7 @@ import {keyBy, VEYFI_CHAIN_ID} from 'app/utils';
 import {FixedNumber} from 'ethers';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useAsyncTrigger} from '@builtbymom/web3/hooks/useAsyncTrigger';
-import {toAddress, toNormalizedBN} from '@builtbymom/web3/utils';
+import {isZeroAddress, toAddress, toNormalizedBN} from '@builtbymom/web3/utils';
 import {decodeAsAddress, decodeAsBigInt, decodeAsNumber, decodeAsString} from '@builtbymom/web3/utils/decoder';
 import {retrieveConfig} from '@builtbymom/web3/utils/wagmi';
 import {useDeepCompareMemo} from '@react-hookz/web';
@@ -45,17 +45,25 @@ const defaultProps: TGaugeContext = {
 const GaugeContext = createContext<TGaugeContext>(defaultProps);
 export const GaugeContextApp = memo(function GaugeContextApp({children}: {children: ReactElement}): ReactElement {
 	const {address, isActive} = useWeb3();
-	const {vaults} = useYearn();
+	const {vaults, vaultsAll} = useYearn();
 	const [gauges, set_gauges] = useState<TGauge[]>([]);
 	const [userPositionInGauge, set_userPositionInGauge] = useState<TDict<TGaugePosition>>({});
 	const [vaultsWithGauges, set_vaultsWithGauges] = useState<TYearnVault[] | undefined>(undefined);
 
 	useEffect(() => {
-		const _vaultsWithGauges = Object.values(vaults).filter(
-			({chainID, staking}) => chainID === 1 && staking.available && staking.source === 'VeYFI'
-		);
-		set_vaultsWithGauges(_vaultsWithGauges);
-	}, [vaults]);
+		const vaultsByGaugeAddress = new Map<string, TYearnVault>();
+		for (const vault of [...Object.values(vaultsAll), ...Object.values(vaults)]) {
+			if (
+				vault.chainID !== VEYFI_CHAIN_ID ||
+				isZeroAddress(vault.staking.address) ||
+				vault.staking.source !== 'VeYFI'
+			) {
+				continue;
+			}
+			vaultsByGaugeAddress.set(toAddress(vault.staking.address), vault);
+		}
+		set_vaultsWithGauges([...vaultsByGaugeAddress.values()]);
+	}, [vaults, vaultsAll]);
 
 	const refreshVotingEscrow = useAsyncTrigger(async (): Promise<void> => {
 		if (!vaultsWithGauges || vaultsWithGauges.length === 0) {

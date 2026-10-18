@@ -38,7 +38,7 @@ function GaugeRewards(): ReactElement {
 	const {provider, isActive} = useWeb3();
 	const {gaugesMap, userPositionInGauge, refresh: refreshGauges} = useGauge();
 	const {dYFIPrice} = useOption();
-	const {vaults} = useYearn();
+	const {vaultsAll} = useYearn();
 	const refreshData = useCallback((): unknown => Promise.all([refreshGauges()]), [refreshGauges]);
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 	const selectedGaugeAddress = toAddress(selectedGauge?.id);
@@ -65,7 +65,7 @@ function GaugeRewards(): ReactElement {
 			if (toBigInt(userPositionInGauge[gauge.address]?.reward?.raw) === 0n) {
 				continue;
 			}
-			const vault = vaults[toAddress(gauge?.vaultAddress)];
+			const vault = vaultsAll[toAddress(gauge?.vaultAddress)];
 			if (!vault) {
 				continue;
 			}
@@ -77,7 +77,7 @@ function GaugeRewards(): ReactElement {
 			});
 		}
 		return options;
-	}, [gaugesMap, userPositionInGauge, vaults]);
+	}, [gaugesMap, userPositionInGauge, vaultsAll]);
 
 	return (
 		<div className={'flex flex-col gap-6 md:gap-10'}>

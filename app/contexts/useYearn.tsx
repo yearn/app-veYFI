@@ -1,18 +1,17 @@
 import {createContext, memo, useCallback, useContext} from 'react';
+import {useKongYearnVaults} from 'app/hooks/useKongYearnVaults';
+import {usePriceServiceSpot} from 'app/hooks/usePriceServiceSpot';
 import {deserialize, serialize} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {isZeroAddress, toAddress, toNormalizedBN, zeroNormalizedBN} from '@builtbymom/web3/utils';
 import {useLocalStorageValue} from '@react-hookz/web';
-
-import {useKongYearnVaults} from 'app/hooks/useKongYearnVaults';
-import {usePriceServiceSpot} from 'app/hooks/usePriceServiceSpot';
 import {useYearnBalances} from './useYearn.helper';
 
 import type {ReactElement} from 'react';
+import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
 import type {TYChainTokens, TYToken} from '@yearn-finance/web-lib/types';
 import type {TUseBalancesTokens} from '@builtbymom/web3/hooks/useBalances.multichains';
 import type {TAddress, TDict, TNormalizedBN} from '@builtbymom/web3/types';
-import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
 
 export const DEFAULT_SLIPPAGE = 0.5;
 export const DEFAULT_MAX_LOSS = 1n;
@@ -30,9 +29,10 @@ type TSolver =
 const DEFAULT_ZAP_PROVIDER: TSolver = 'Cowswap';
 
 type TTokenAndChain = {address: TAddress; chainID: number};
+type TPricesByChain = {[chainID: number]: {[address: string]: number}};
 export type TYearnContext = {
 	currentPartner: TAddress;
-	prices: Record<number, Record<string, number>>;
+	prices: TPricesByChain;
 	vaults: TDict<TYearnVault>;
 	vaultsMigrations: TDict<TYearnVault>;
 	vaultsRetired: TDict<TYearnVault>;

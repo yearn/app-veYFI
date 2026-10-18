@@ -8,7 +8,7 @@ const KONG_VAULT_LIST_URL = 'https://kong.yearn.fi/api/rest/list/vaults/1?origin
 const KONG_SNAPSHOT_URL = 'https://kong.yearn.fi/api/rest/snapshot/1';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-type TRecord = Record<string, unknown>;
+type TRecord = {[key: string]: unknown};
 
 type TKongVaultListRecord = TRecord & {
 	address?: unknown;
@@ -41,6 +41,9 @@ type TKongSnapshot = TRecord & {
 	isHidden?: unknown;
 	isRetired?: unknown;
 };
+
+type TKongSnapshotMap = {[address: string]: TKongSnapshot};
+type TYearnVaultMap = {[address: string]: TYearnVault};
 
 type TKongToken = {
 	address: TAddress;
@@ -233,8 +236,8 @@ function normalizeVault(record: TKongVaultListRecord, snapshot?: TKongSnapshot):
 	const snapshotMigration = migrationData(snapshot?.migration ?? meta?.migration);
 	const listMigration = migrationData(record.migration);
 	const staking = stakingData(record.staking, snapshot?.staking);
-	const snapshotHidden = meta?.isHidden === true || snapshot?.isHidden === true;
-	const snapshotRetired = meta?.isRetired === true || snapshot?.isRetired === true;
+	const hasSnapshotHidden = meta?.isHidden === true || snapshot?.isHidden === true;
+	const hasSnapshotRetired = meta?.isRetired === true || snapshot?.isRetired === true;
 
 	return {
 		address,
@@ -249,8 +252,8 @@ function normalizeVault(record: TKongVaultListRecord, snapshot?: TKongSnapshot):
 		performance: yieldData(snapshot?.performance ?? record.performance),
 		staking,
 		migration: snapshotMigration.available ? snapshotMigration : listMigration,
-		isHidden: record.isHidden === true || snapshotHidden,
-		isRetired: record.isRetired === true || snapshotRetired
+		isHidden: record.isHidden === true || hasSnapshotHidden,
+		isRetired: record.isRetired === true || hasSnapshotRetired
 	};
 }
 
@@ -273,8 +276,8 @@ async function fetchVaultList(): Promise<TKongVaultListRecord[]> {
 	});
 }
 
-async function fetchSnapshots(addresses: string[]): Promise<Record<string, TKongSnapshot>> {
-	const snapshots: Record<string, TKongSnapshot> = {};
+async function fetchSnapshots(addresses: string[]): Promise<TKongSnapshotMap> {
+	const snapshots: TKongSnapshotMap = {};
 	for (let offset = 0; offset < addresses.length; offset += 8) {
 		const batch = addresses.slice(offset, offset + 8);
 		const results = await Promise.allSettled(
@@ -306,10 +309,10 @@ async function fetchSnapshots(addresses: string[]): Promise<Record<string, TKong
 }
 
 export function useKongYearnVaults(): {
-	vaults: Record<string, TYearnVault>;
-	vaultsMigrations: Record<string, TYearnVault>;
-	vaultsRetired: Record<string, TYearnVault>;
-	vaultsAll: Record<string, TYearnVault>;
+	vaults: TYearnVaultMap;
+	vaultsMigrations: TYearnVaultMap;
+	vaultsRetired: TYearnVaultMap;
+	vaultsAll: TYearnVaultMap;
 	isLoading: boolean;
 	mutate: () => Promise<unknown>;
 } {
@@ -335,16 +338,16 @@ export function useKongYearnVaults(): {
 			.sort();
 	}, [records]);
 	const snapshotsKey = snapshotAddresses.length > 0 ? `kong-snapshots:${snapshotAddresses.join(',')}` : null;
-	const {data: snapshots} = useSWR<Record<string, TKongSnapshot>>(
+	const {data: snapshots} = useSWR<TKongSnapshotMap>(
 		snapshotsKey,
-		() => fetchSnapshots(snapshotAddresses),
+		async (): Promise<TKongSnapshotMap> => fetchSnapshots(snapshotAddresses),
 		{revalidateOnFocus: true, revalidateOnReconnect: true, refreshInterval: 5 * 60 * 1000}
 	);
 
 	const data = useMemo(() => {
-		const vaults: Record<string, TYearnVault> = {};
-		const vaultsMigrations: Record<string, TYearnVault> = {};
-		const vaultsRetired: Record<string, TYearnVault> = {};
+		const vaults: TYearnVaultMap = {};
+		const vaultsMigrations: TYearnVaultMap = {};
+		const vaultsRetired: TYearnVaultMap = {};
 		for (const record of records ?? []) {
 			const address = asAddress(record.address);
 			const vault = normalizeVault(record, address ? snapshots?.[address.toLowerCase()] : undefined);

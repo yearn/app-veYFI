@@ -26,8 +26,8 @@ import {ImageWithFallback} from './common/ImageWithFallback';
 import {Table} from './common/Table';
 
 import type {ReactElement} from 'react';
-import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
+import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
 type TGaugeData = {
 	gaugeAddress: TAddress;

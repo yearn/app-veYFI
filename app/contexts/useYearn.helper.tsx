@@ -9,9 +9,9 @@ import {ETH_TOKEN_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
 import {useBalances} from './useBalances.multichains';
 
 import type {TYChainTokens} from '@yearn-finance/web-lib/types';
+import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
 import type {TUseBalancesTokens} from '@builtbymom/web3/hooks/useBalances.multichains';
 import type {TDict} from '@builtbymom/web3/types';
-import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
 
 function addBalanceToken(tokens: Map<string, TUseBalancesTokens>, token: TUseBalancesTokens): void {
 	const address = toAddress(token.address);

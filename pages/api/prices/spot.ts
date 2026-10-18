@@ -1,5 +1,5 @@
-import type {NextApiRequest, NextApiResponse} from 'next';
 import {ETH_TOKEN_ADDRESS, YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
+import type {NextApiRequest, NextApiResponse} from 'next';
 
 const PRICE_SERVICE_URL = 'https://prices.yearn.dev/api/prices/spot';
 const MAX_PRICE_AGE_SECONDS = 15 * 60;
@@ -20,12 +20,15 @@ type TPriceServiceCoin = {
 	error?: {code?: string; message?: string};
 };
 
+type TPriceServiceCoinMap = {[coinKey: string]: TPriceServiceCoin};
+type TPricesByChain = {[chainID: number]: {[address: string]: number}};
+
 type TPriceServiceResponse = {
-	coins?: Record<string, TPriceServiceCoin>;
+	coins?: TPriceServiceCoinMap;
 };
 
 type TSpotResponse = {
-	prices?: Record<number, Record<string, number>>;
+	prices?: TPricesByChain;
 	error?: string;
 };
 
@@ -88,7 +91,7 @@ export default async function handler(
 		);
 
 		const nowSeconds = Date.now() / 1000;
-		const prices: Record<number, Record<string, number>> = {1: {}};
+		const prices: TPricesByChain = {1: {}};
 		for (const {key, aliases} of PRICE_KEYS) {
 			const price = freshPrice(coinsByLowercaseKey.get(key.toLowerCase()), nowSeconds);
 			if (price === undefined) {

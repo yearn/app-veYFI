@@ -14,8 +14,8 @@ import {VEYFI_ADDRESS, YFI_ADDRESS} from '@yearn-finance/web-lib/utils/constants
 
 import {useYearnTokenPrice} from './useYearnTokenPrice';
 
-import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
+import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
 type TUseVeYFIAPY = {
 	dYFIPrice: number | undefined;

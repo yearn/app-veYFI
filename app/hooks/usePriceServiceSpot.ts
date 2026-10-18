@@ -1,7 +1,9 @@
 import useSWR from 'swr';
 
+type TPricesByChain = {[chainID: number]: {[address: string]: number}};
+
 type TPriceServiceResponse = {
-	prices?: Record<number, Record<string, number>>;
+	prices?: TPricesByChain;
 };
 
 async function fetchPriceServiceSpot(): Promise<TPriceServiceResponse> {
@@ -12,7 +14,7 @@ async function fetchPriceServiceSpot(): Promise<TPriceServiceResponse> {
 	return (await response.json()) as TPriceServiceResponse;
 }
 
-export function usePriceServiceSpot(): Record<number, Record<string, number>> {
+export function usePriceServiceSpot(): TPricesByChain {
 	const {data, error, isValidating} = useSWR<TPriceServiceResponse>('/api/prices/spot', fetchPriceServiceSpot, {
 		revalidateOnFocus: true,
 		revalidateOnReconnect: true,

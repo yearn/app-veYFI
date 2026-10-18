@@ -19,7 +19,7 @@ export function HeadingData(): ReactElement {
 			items={[
 				{
 					label: 'Max veYFI lock vAPY',
-					content: APY ? formatPercent(APY * 100) : '-'
+					content: APY === undefined ? '-' : formatPercent(APY * 100)
 				},
 				{
 					label: 'Total Locked YFI',

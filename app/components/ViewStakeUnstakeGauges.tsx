@@ -11,7 +11,6 @@ import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
 	formatAmount,
 	formatPercent,
-	isZero,
 	toAddress,
 	toBigInt,
 	toNormalizedBN,
@@ -35,10 +34,10 @@ type TGaugeData = {
 	decimals: number;
 	vaultIcon: string;
 	vaultName: string;
-	vaultApy: number;
+	vaultApy: number | undefined;
 	vaultVersion: 2 | 3;
 	vaultDeposited: TNormalizedBN;
-	gaugeAPY: number;
+	gaugeAPY: number | undefined;
 	gaugeBoost: number;
 	gaugeStaked: TNormalizedBN;
 	actions: undefined;
@@ -177,24 +176,21 @@ export function StakeUnstakeGauges(): ReactElement {
 
 			const vaultBalance = getBalance({address: vault.address, chainID: vault.chainID});
 			const boost = Number(userPositionInGauge[gauge.address]?.boost || 1);
-			const APYFor10xBoost = vault.apr.extra.stakingRewardsAPR * 100;
-			const vaultForwardAPR = vault.apr.forwardAPR.netAPR;
-			const vaultMonthlyAPY = vault.apr.points.monthAgo;
-			const vaultWeeklyAPY = vault.apr.points.weekAgo;
+			const stakingRewardAPY = vault.staking.rewards.reduce(
+				(total, reward) => total + (reward.apr ?? 0),
+				0
+			);
+			const hasStakingRewardAPY = vault.staking.rewards.some((reward) => reward.apr !== undefined);
 			data.push({
 				gaugeAddress: gauge.address,
 				vaultAddress: vault.address,
 				decimals: gauge.decimals,
-				vaultIcon: `${process.env.BASE_YEARN_ASSETS_URI}/1/${vault.token.address}/logo-128.png`,
+				vaultIcon: `${process.env.BASE_YEARN_ASSETS_URI}/1/${vault.token?.address ?? vault.address}/logo-128.png`,
 				vaultName: vault?.name ?? `Vault ${truncateHex(vault.address, 4)}`,
-				vaultApy: isZero(vaultForwardAPR)
-					? isZero(vaultMonthlyAPY)
-						? vaultWeeklyAPY
-						: vaultMonthlyAPY
-					: vaultForwardAPR,
+				vaultApy: vault.performance.oracle?.netAPY,
 				vaultDeposited: vaultBalance,
 				vaultVersion: vault.version.startsWith('3') ? 3 : 2,
-				gaugeAPY: APYFor10xBoost,
+				gaugeAPY: hasStakingRewardAPY ? stakingRewardAPY * 100 : undefined,
 				gaugeBoost: boost,
 				gaugeStaked: userPositionInGauge[gauge.address]?.deposit ?? zeroNormalizedBN,
 				actions: undefined
@@ -273,7 +269,8 @@ export function StakeUnstakeGauges(): ReactElement {
 							key: 'vaultApy',
 							label: 'Vault APY',
 							sortable: true,
-							format: ({vaultApy}): string => formatPercent(vaultApy * 100, 2, 2, 500)
+							format: ({vaultApy}): string =>
+								vaultApy === undefined ? '-' : formatPercent(vaultApy * 100, 2, 2, 500)
 						},
 						{
 							key: 'vaultDeposited',
@@ -293,7 +290,9 @@ export function StakeUnstakeGauges(): ReactElement {
 							transform: ({gaugeAPY}): ReactElement => (
 								<div className={'font-number flex flex-col'}>
 									<p className={'font-bold'}>
-										{`${formatAmount(gaugeAPY / 10, 2, 2)}% → ${formatAmount(gaugeAPY, 2, 2)}%`}
+										{gaugeAPY === undefined
+											? '-'
+											: `${formatAmount(gaugeAPY / 10, 2, 2)}% → ${formatAmount(gaugeAPY, 2, 2)}%`}
 									</p>
 								</div>
 							)

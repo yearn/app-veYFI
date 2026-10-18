@@ -16,7 +16,7 @@ import type {TNormalizedBN} from '@builtbymom/web3/types';
 
 export type TOptionContext = {
 	getRequiredEth: (amount: bigint) => Promise<bigint>;
-	dYFIPrice: number;
+	dYFIPrice: number | undefined;
 	position: TNormalizedBN;
 	discount: TNormalizedBN;
 	refresh: () => void;
@@ -24,7 +24,7 @@ export type TOptionContext = {
 
 const defaultProps: TOptionContext = {
 	getRequiredEth: async (): Promise<bigint> => BIG_ZERO,
-	dYFIPrice: 0,
+	dYFIPrice: undefined,
 	discount: zeroNormalizedBN,
 	position: zeroNormalizedBN,
 	refresh: (): void => undefined
@@ -33,7 +33,7 @@ const defaultProps: TOptionContext = {
 const OptionContext = createContext<TOptionContext>(defaultProps);
 export const OptionContextApp = memo(function OptionContextApp({children}: {children: ReactElement}): ReactElement {
 	const {address: userAddress} = useWeb3();
-	const [dYFIPrice, set_dYFIPrice] = useState<number>(0);
+	const [dYFIPrice, set_dYFIPrice] = useState<number | undefined>(undefined);
 	const [position, set_position] = useState<TNormalizedBN>(zeroNormalizedBN);
 	const [discount, set_discount] = useState<TNormalizedBN>(zeroNormalizedBN);
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
@@ -61,8 +61,7 @@ export const OptionContextApp = memo(function OptionContextApp({children}: {chil
 			chainId: VEYFI_CHAIN_ID
 		});
 		const discount = toNormalizedBN(discountRaw, 18);
-		const dYFIPrice = yfiPrice * Number(discount?.normalized || 0);
-		set_dYFIPrice(dYFIPrice);
+		set_dYFIPrice(yfiPrice === undefined ? undefined : yfiPrice * Number(discount?.normalized || 0));
 		set_discount(discount);
 	}, [yfiPrice]);
 

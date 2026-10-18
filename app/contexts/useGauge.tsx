@@ -13,8 +13,8 @@ import {readContracts} from '@wagmi/core';
 import {useYearn} from './useYearn';
 
 import type {ReactElement} from 'react';
-import type {TYDaemonVaults} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 import type {TAddress, TDict, TNormalizedBN} from '@builtbymom/web3/types';
+import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
 
 export type TGauge = {
 	address: TAddress;
@@ -48,7 +48,7 @@ export const GaugeContextApp = memo(function GaugeContextApp({children}: {childr
 	const {vaults} = useYearn();
 	const [gauges, set_gauges] = useState<TGauge[]>([]);
 	const [userPositionInGauge, set_userPositionInGauge] = useState<TDict<TGaugePosition>>({});
-	const [vaultsWithGauges, set_vaultsWithGauges] = useState<TYDaemonVaults | undefined>(undefined);
+	const [vaultsWithGauges, set_vaultsWithGauges] = useState<TYearnVault[] | undefined>(undefined);
 
 	useEffect(() => {
 		const _vaultsWithGauges = Object.values(vaults).filter(

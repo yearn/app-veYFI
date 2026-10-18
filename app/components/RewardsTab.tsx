@@ -29,6 +29,10 @@ import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
 import type {TDropdownOption} from './common/Dropdown';
 
+function priceLegend(amount: number, price: number | undefined): string {
+	return price === undefined ? 'Price unavailable' : formatCounterValue(amount, price);
+}
+
 function GaugeRewards(): ReactElement {
 	const [selectedGauge, set_selectedGauge] = useState<TDropdownOption>();
 	const {provider, isActive} = useWeb3();
@@ -99,7 +103,7 @@ function GaugeRewards(): ReactElement {
 					<AmountInput
 						label={'Unclaimed rewards (dYFI)'}
 						amount={selectedGaugeRewards}
-						legend={formatCounterValue(selectedGaugeRewards.normalized, dYFIPrice)}
+						legend={priceLegend(selectedGaugeRewards.normalized, dYFIPrice)}
 						disabled
 					/>
 					<Button
@@ -170,7 +174,7 @@ function BoostRewards(): ReactElement {
 				<AmountInput
 					label={'Unclaimed veYFI boost rewards (dYFI)'}
 					amount={claimable}
-					legend={formatCounterValue(claimable.normalized, dYFIPrice)}
+					legend={priceLegend(claimable.normalized, dYFIPrice)}
 					disabled
 				/>
 				<Button
@@ -241,7 +245,7 @@ function ExitRewards(): ReactElement {
 				<AmountInput
 					label={'Unclaimed veYFI exit rewards (YFI)'}
 					amount={claimable}
-					legend={formatCounterValue(claimable.normalized, yfiPrice)}
+					legend={priceLegend(claimable.normalized, yfiPrice)}
 					disabled
 				/>
 				<Button

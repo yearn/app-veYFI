@@ -2,7 +2,10 @@ import {ETH_TOKEN_ADDRESS, YFI_ADDRESS} from '@builtbymom/web3/utils/constants';
 
 import type {NextApiRequest, NextApiResponse} from 'next';
 
-const PRICE_SERVICE_URL = 'https://prices.yearn.dev/api/prices/spot';
+const PRICE_SERVICE_URL = new URL(
+	'/api/prices/spot',
+	process.env.YEARN_PRICES_BASE_URL || 'https://prices.yearn.dev'
+).toString();
 const MAX_PRICE_AGE_SECONDS = 15 * 60;
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 

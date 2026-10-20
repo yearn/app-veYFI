@@ -29,12 +29,16 @@ import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
 import type {TDropdownOption} from './common/Dropdown';
 
+function priceLegend(amount: number, price: number | undefined): string {
+	return price === undefined ? 'Price unavailable' : formatCounterValue(amount, price);
+}
+
 function GaugeRewards(): ReactElement {
 	const [selectedGauge, set_selectedGauge] = useState<TDropdownOption>();
 	const {provider, isActive} = useWeb3();
 	const {gaugesMap, userPositionInGauge, refresh: refreshGauges} = useGauge();
 	const {dYFIPrice} = useOption();
-	const {vaults} = useYearn();
+	const {vaultsAll} = useYearn();
 	const refreshData = useCallback((): unknown => Promise.all([refreshGauges()]), [refreshGauges]);
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 	const selectedGaugeAddress = toAddress(selectedGauge?.id);
@@ -61,7 +65,7 @@ function GaugeRewards(): ReactElement {
 			if (toBigInt(userPositionInGauge[gauge.address]?.reward?.raw) === 0n) {
 				continue;
 			}
-			const vault = vaults[toAddress(gauge?.vaultAddress)];
+			const vault = vaultsAll[toAddress(gauge?.vaultAddress)];
 			if (!vault) {
 				continue;
 			}
@@ -73,7 +77,7 @@ function GaugeRewards(): ReactElement {
 			});
 		}
 		return options;
-	}, [gaugesMap, userPositionInGauge, vaults]);
+	}, [gaugesMap, userPositionInGauge, vaultsAll]);
 
 	return (
 		<div className={'flex flex-col gap-6 md:gap-10'}>
@@ -99,7 +103,7 @@ function GaugeRewards(): ReactElement {
 					<AmountInput
 						label={'Unclaimed rewards (dYFI)'}
 						amount={selectedGaugeRewards}
-						legend={formatCounterValue(selectedGaugeRewards.normalized, dYFIPrice)}
+						legend={priceLegend(selectedGaugeRewards.normalized, dYFIPrice)}
 						disabled
 					/>
 					<Button
@@ -170,7 +174,7 @@ function BoostRewards(): ReactElement {
 				<AmountInput
 					label={'Unclaimed veYFI boost rewards (dYFI)'}
 					amount={claimable}
-					legend={formatCounterValue(claimable.normalized, dYFIPrice)}
+					legend={priceLegend(claimable.normalized, dYFIPrice)}
 					disabled
 				/>
 				<Button
@@ -241,7 +245,7 @@ function ExitRewards(): ReactElement {
 				<AmountInput
 					label={'Unclaimed veYFI exit rewards (YFI)'}
 					amount={claimable}
-					legend={formatCounterValue(claimable.normalized, yfiPrice)}
+					legend={priceLegend(claimable.normalized, yfiPrice)}
 					disabled
 				/>
 				<Button

@@ -11,7 +11,6 @@ import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
 	formatAmount,
 	formatPercent,
-	isZero,
 	toAddress,
 	toBigInt,
 	toNormalizedBN,
@@ -26,6 +25,7 @@ import {IconLinkOut} from '@yearn-finance/web-lib/icons/IconLinkOut';
 import {ImageWithFallback} from './common/ImageWithFallback';
 import {Table} from './common/Table';
 
+import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
 import type {ReactElement} from 'react';
 import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
@@ -35,16 +35,34 @@ type TGaugeData = {
 	decimals: number;
 	vaultIcon: string;
 	vaultName: string;
-	vaultApy: number;
+	vaultApy: number | undefined;
 	vaultVersion: 2 | 3;
+	canStake: boolean;
 	vaultDeposited: TNormalizedBN;
-	gaugeAPY: number;
+	gaugeAPR: number | undefined;
 	gaugeBoost: number;
 	gaugeStaked: TNormalizedBN;
 	actions: undefined;
 };
 
-function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeStaked}: TGaugeData): ReactElement {
+function nativeAPY(vault: TYearnVault): number | undefined {
+	const isV2 = !vault.version.startsWith('3');
+	return (
+		vault.performance.oracle?.netAPY ??
+		(isV2 ? vault.performance.estimated?.apy : undefined) ??
+		vault.performance.historical?.monthlyNet ??
+		vault.performance.historical?.weeklyNet ??
+		vault.performance.historical?.net
+	);
+}
+
+function StakeUnstakeButtons({
+	vaultAddress,
+	gaugeAddress,
+	vaultDeposited,
+	gaugeStaked,
+	canStake
+}: TGaugeData): ReactElement {
 	const {provider, address, isActive} = useWeb3();
 	const {refresh: refreshGauges} = useGauge();
 	const {onRefresh: refreshBalances} = useYearn();
@@ -132,7 +150,7 @@ function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeS
 				isBusy={unstakeStatus.pending}>
 				{'Unstake'}
 			</Button>
-			{!isApproved && (
+			{canStake && !isApproved && (
 				<Button
 					className={'h-8 w-full text-xs md:w-24'}
 					onClick={async (): Promise<void> =>
@@ -143,7 +161,7 @@ function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeS
 					{'Approve'}
 				</Button>
 			)}
-			{isApproved && (
+			{canStake && isApproved && (
 				<Button
 					className={'h-8 w-full text-xs md:w-24'}
 					onClick={async (): Promise<void> => onStake(gaugeAddress, toBigInt(vaultDeposited?.raw))}
@@ -158,51 +176,58 @@ function StakeUnstakeButtons({vaultAddress, gaugeAddress, vaultDeposited, gaugeS
 
 export function StakeUnstakeGauges(): ReactElement {
 	const {gaugesMap, userPositionInGauge} = useGauge();
-	const {vaults} = useYearn();
+	const {vaults, vaultsAll} = useYearn();
 	const {getBalance} = useYearn();
 	const [isLoadingGauges, set_isLoadingGauges] = useState(true);
 	const {search, onSearch} = useQueryArguments();
 
 	const gaugesData = useMemo((): TGaugeData[] => {
-		if (!vaults || Object.values(vaults).length === 0 || !gaugesMap || Object.values(gaugesMap).length === 0) {
+		if (!vaultsAll || Object.values(vaultsAll).length === 0 || !gaugesMap || Object.values(gaugesMap).length === 0) {
 			return [];
 		}
 
 		const data: TGaugeData[] = [];
 		for (const gauge of Object.values(gaugesMap)) {
-			const vault = vaults[toAddress(gauge?.vaultAddress)];
+			const vault = vaultsAll[toAddress(gauge?.vaultAddress)];
 			if (!gauge || !vault) {
 				continue;
 			}
 
+			const canStake = Boolean(vaults[toAddress(vault.address)]);
+			const position = userPositionInGauge[gauge.address];
+			if (
+				!canStake &&
+				toBigInt(position?.deposit?.raw) === 0n &&
+				toBigInt(position?.reward?.raw) === 0n
+			) {
+				continue;
+			}
 			const vaultBalance = getBalance({address: vault.address, chainID: vault.chainID});
-			const boost = Number(userPositionInGauge[gauge.address]?.boost || 1);
-			const APYFor10xBoost = vault.apr.extra.stakingRewardsAPR * 100;
-			const vaultForwardAPR = vault.apr.forwardAPR.netAPR;
-			const vaultMonthlyAPY = vault.apr.points.monthAgo;
-			const vaultWeeklyAPY = vault.apr.points.weekAgo;
+			const boost = Number(position?.boost || 1);
+			const stakingRewardAPR = vault.staking.rewards.reduce(
+				(total, reward) => total + (reward.apr ?? 0),
+				0
+			);
+			const hasStakingRewardAPR = vault.staking.rewards.some((reward) => reward.apr !== undefined);
 			data.push({
 				gaugeAddress: gauge.address,
 				vaultAddress: vault.address,
 				decimals: gauge.decimals,
-				vaultIcon: `${process.env.BASE_YEARN_ASSETS_URI}/1/${vault.token.address}/logo-128.png`,
+				vaultIcon: `${process.env.BASE_YEARN_ASSETS_URI}/1/${vault.token?.address ?? vault.address}/logo-128.png`,
 				vaultName: vault?.name ?? `Vault ${truncateHex(vault.address, 4)}`,
-				vaultApy: isZero(vaultForwardAPR)
-					? isZero(vaultMonthlyAPY)
-						? vaultWeeklyAPY
-						: vaultMonthlyAPY
-					: vaultForwardAPR,
+				vaultApy: nativeAPY(vault),
 				vaultDeposited: vaultBalance,
 				vaultVersion: vault.version.startsWith('3') ? 3 : 2,
-				gaugeAPY: APYFor10xBoost,
+				canStake,
+				gaugeAPR: hasStakingRewardAPR ? stakingRewardAPR * 100 : undefined,
 				gaugeBoost: boost,
-				gaugeStaked: userPositionInGauge[gauge.address]?.deposit ?? zeroNormalizedBN,
+				gaugeStaked: position?.deposit ?? zeroNormalizedBN,
 				actions: undefined
 			});
 		}
 		set_isLoadingGauges(false);
 		return data;
-	}, [vaults, gaugesMap, getBalance, userPositionInGauge]);
+	}, [vaults, vaultsAll, gaugesMap, getBalance, userPositionInGauge]);
 
 	const searchedGaugesData = useMemo((): TGaugeData[] => {
 		if (!search) {
@@ -273,7 +298,8 @@ export function StakeUnstakeGauges(): ReactElement {
 							key: 'vaultApy',
 							label: 'Vault APY',
 							sortable: true,
-							format: ({vaultApy}): string => formatPercent(vaultApy * 100, 2, 2, 500)
+							format: ({vaultApy}): string =>
+								vaultApy === undefined ? '-' : formatPercent(vaultApy * 100, 2, 2, 500)
 						},
 						{
 							key: 'vaultDeposited',
@@ -285,15 +311,17 @@ export function StakeUnstakeGauges(): ReactElement {
 							format: ({vaultDeposited}): string => formatAmount(vaultDeposited?.normalized || 0, 2, 6)
 						},
 						{
-							key: 'gaugeAPY',
-							label: 'Gauge APY',
+							key: 'gaugeAPR',
+							label: 'Gauge APR',
 							columnSpan: 2,
 							sortable: true,
 							className: 'whitespace-break text-right',
-							transform: ({gaugeAPY}): ReactElement => (
+							transform: ({gaugeAPR}): ReactElement => (
 								<div className={'font-number flex flex-col'}>
 									<p className={'font-bold'}>
-										{`${formatAmount(gaugeAPY / 10, 2, 2)}% → ${formatAmount(gaugeAPY, 2, 2)}%`}
+										{gaugeAPR === undefined
+											? '-'
+											: `${formatAmount(gaugeAPR / 10, 2, 2)}% → ${formatAmount(gaugeAPR, 2, 2)}%`}
 									</p>
 								</div>
 							)
@@ -339,7 +367,11 @@ export function StakeUnstakeGauges(): ReactElement {
 							className: 'my-4 md:my-0',
 							fullWidth: true,
 							transform: (props): ReactElement => {
+								if (!props.canStake && toBigInt(props.gaugeStaked?.raw) === 0n) {
+									return <p>{'Inactive'}</p>;
+								}
 								if (
+									props.canStake &&
 									toBigInt(props?.vaultDeposited?.raw) === 0n &&
 									toBigInt(props?.gaugeStaked.raw) === 0n
 								) {
@@ -362,7 +394,7 @@ export function StakeUnstakeGauges(): ReactElement {
 					isLoading={isLoadingGauges}
 					data={searchedGaugesData}
 					columns={13}
-					initialSortBy={'gaugeAPY'}
+					initialSortBy={'gaugeAPR'}
 				/>
 			</div>
 		</div>

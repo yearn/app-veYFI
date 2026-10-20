@@ -14,13 +14,13 @@ import {VEYFI_ADDRESS, YFI_ADDRESS} from '@yearn-finance/web-lib/utils/constants
 
 import {useYearnTokenPrice} from './useYearnTokenPrice';
 
-import type {TYDaemonVaults} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
+import type {TYearnVault} from 'app/hooks/useKongYearnVaults';
 import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
 type TUseVeYFIAPY = {
-	dYFIPrice: number;
+	dYFIPrice: number | undefined;
 };
-function useVeYFIAPY({dYFIPrice}: TUseVeYFIAPY): number {
+function useVeYFIAPY({dYFIPrice}: TUseVeYFIAPY): number | undefined {
 	const {vaults} = useYearn();
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const {data: veYFISupply} = useReadContract({
@@ -30,7 +30,7 @@ function useVeYFIAPY({dYFIPrice}: TUseVeYFIAPY): number {
 		chainId: VEYFI_CHAIN_ID
 	});
 	const [rate, set_rate] = useState<number>(0);
-	const [vaultsWithGauges, set_vaultsWithGauges] = useState<TYDaemonVaults | undefined>(undefined);
+	const [vaultsWithGauges, set_vaultsWithGauges] = useState<TYearnVault[] | undefined>(undefined);
 	const isRunning = useRef(false);
 
 	useEffect(() => {
@@ -161,12 +161,21 @@ function useVeYFIAPY({dYFIPrice}: TUseVeYFIAPY): number {
 		isRunning.current = false;
 	}, [vaultsWithGauges]);
 
-	const APY = useMemo((): number => {
+	const APY = useMemo((): number | undefined => {
+		if (
+			dYFIPrice === undefined ||
+			yfiPrice === undefined ||
+			yfiPrice <= 0 ||
+			!veYFISupply ||
+			toNormalizedBN(toBigInt(veYFISupply), 18).normalized <= 0
+		) {
+			return undefined;
+		}
 		const apy =
 			(rate * SECONDS_PER_YEAR * dYFIPrice) /
 			Number(toNormalizedBN(toBigInt(veYFISupply), 18).normalized) /
 			yfiPrice;
-		return apy;
+		return Number.isFinite(apy) ? apy : undefined;
 	}, [rate, dYFIPrice, yfiPrice, veYFISupply]);
 
 	return APY;

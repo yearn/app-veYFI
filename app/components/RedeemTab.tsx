@@ -35,6 +35,7 @@ export function RedeemTab(): ReactElement {
 	const ethBalance = useYearnToken({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
 	const yfiBalance = useBalance({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID}); //VeYFI is on ETH mainnet only
 	const yfiPrice = useYearnTokenPrice({address: YFI_ADDRESS, chainID: VEYFI_CHAIN_ID});
+	const ethPrice = getPrice({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID});
 	const [approveRedeemStatus, set_approveRedeemStatus] = useState(defaultTxStatus);
 	const [redeemStatus, set_redeemStatus] = useState(defaultTxStatus);
 	const [ethRequired, set_ethRequired] = useState(zeroNormalizedBN);
@@ -136,7 +137,9 @@ export function RedeemTab(): ReactElement {
 									<p
 										suppressHydrationWarning
 										className={'text-neutral-400'}>
-										{formatCounterValue(redeemAmount.normalized, dYFIPrice)}
+										{dYFIPrice === undefined
+											? 'Price unavailable'
+											: formatCounterValue(redeemAmount.normalized, dYFIPrice)}
 									</p>
 									<p
 										suppressHydrationWarning
@@ -157,10 +160,9 @@ export function RedeemTab(): ReactElement {
 									<p
 										suppressHydrationWarning
 										className={'text-neutral-400'}>
-										{formatCounterValue(
-											ethRequired.normalized,
-											getPrice({address: ETH_TOKEN_ADDRESS, chainID: VEYFI_CHAIN_ID}).normalized
-										)}
+										{ethPrice === undefined
+											? 'Price unavailable'
+											: formatCounterValue(ethRequired.normalized, ethPrice.normalized)}
 									</p>
 									<p
 										suppressHydrationWarning
@@ -182,7 +184,9 @@ export function RedeemTab(): ReactElement {
 									<p
 										suppressHydrationWarning
 										className={'text-neutral-400'}>
-										{formatCounterValue(redeemAmount.normalized, yfiPrice)}
+										{yfiPrice === undefined
+											? 'Price unavailable'
+											: formatCounterValue(redeemAmount.normalized, yfiPrice)}
 									</p>
 									<p
 										suppressHydrationWarning

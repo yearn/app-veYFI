@@ -73,7 +73,7 @@ const config = {
 		 ** Config over the RPC
 		 **********************************************************************/
 		WEB_SOCKET_URL: {
-			1: process.env.WS_URL_MAINNET,
+			1: process.env.WS_URL_MAINNET || 'wss://ethereum-rpc.publicnode.com',
 			10: process.env.WS_URL_OPTIMISM,
 			137: process.env.WS_URL_POLYGON,
 			250: process.env.WS_URL_FANTOM,
